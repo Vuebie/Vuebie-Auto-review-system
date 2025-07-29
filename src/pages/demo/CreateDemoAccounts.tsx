@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { createDemoAccounts } from "@/lib/auth";
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/lib/supabase-client';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -27,13 +27,43 @@ export default function CreateDemoAccounts() {
   const [copiedAdminEmail, setCopiedAdminEmail] = useState(false);
   const [copiedAdminPassword, setCopiedAdminPassword] = useState(false);
 
+  // Helper function to call the secure Edge Function for demo account creation
+  const createDemoAccountsSecure = async (type: 'merchant' | 'admin', count: number = 1) => {
+    const { data: session } = await supabase.auth.getSession();
+    
+    if (!session.session?.access_token) {
+      throw new Error('Authentication required');
+    }
+
+    const response = await fetch(`${supabase.supabaseUrl}/functions/v1/app_08dd1da2ac_create_demo_accounts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.session.access_token}`,
+      },
+      body: JSON.stringify({
+        type,
+        count
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to create demo accounts');
+    }
+
+    if (!result.success) {
+      throw new Error(result.error || 'Unknown error occurred');
+    }
+
+    return result;
+  };
+
   const handleCreateMerchant = async () => {
     setLoadingMerchant(true);
     try {
-      const result = await createDemoAccounts('merchant', 1);
-      if (result.error) {
-        throw new Error(result.error.message);
-      }
+      const result = await createDemoAccountsSecure('merchant', 1);
       if (result.accounts && result.accounts.length > 0) {
         setMerchantCredentials({
           email: result.accounts[0].email,
@@ -52,10 +82,7 @@ export default function CreateDemoAccounts() {
   const handleCreateAdmin = async () => {
     setLoadingAdmin(true);
     try {
-      const result = await createDemoAccounts('admin', 1);
-      if (result.error) {
-        throw new Error(result.error.message);
-      }
+      const result = await createDemoAccountsSecure('admin', 1);
       if (result.accounts && result.accounts.length > 0) {
         setAdminCredentials({
           email: result.accounts[0].email,
