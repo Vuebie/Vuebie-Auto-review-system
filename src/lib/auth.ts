@@ -23,25 +23,49 @@ export async function signInWithEmail(email: string, password: string): Promise<
   error: AuthError | null;
 }> {
   try {
+    console.log(`Attempting to sign in with email: ${email}`);
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) throw error;
+    if (error) {
+      console.error("Authentication error:", JSON.stringify(error));
+      throw error;
+    }
 
+    console.log("Authentication successful, session established");
+    
     if (!data.user) {
+      console.error("No user data returned after successful authentication");
       return { user: null, error: { message: "No user returned after login" } };
     }
 
-    const userProfile = await fetchUserProfile(data.user.id);
-    return { user: userProfile, error: null };
-  } catch (error) {
-    if (import.meta.env.MODE === 'development') {
-      console.error("Error signing in with email:", error);
+    console.log(`User authenticated successfully with ID: ${data.user.id}`);
+    
+    try {
+      const userProfile = await fetchUserProfile(data.user.id);
+      console.log("Login flow completed successfully");
+      return { user: userProfile, error: null };
+    } catch (profileError) {
+      console.error("Failed to fetch user profile after successful authentication:", profileError);
+      throw new Error(`Authentication succeeded but profile fetch failed: ${profileError.message}`);
     }
+  } catch (error) {
+    console.error("Login error:", error);
+    
+    // Enhanced error logging
+    if (error instanceof Error) {
+      console.error(`Error type: ${error.name}, Message: ${error.message}`);
+      console.error(`Stack trace: ${error.stack}`);
+    } else {
+      console.error("Non-Error object thrown:", JSON.stringify(error));
+    }
+    
     const errorMessage = error instanceof Error ? error.message : "Failed to sign in";
     const errorStatus = (error as { status?: number })?.status;
+    
     return {
       user: null,
       error: {
@@ -266,31 +290,111 @@ export async function updateProfile(
 export async function fetchUserProfile(
   userId: string
 ): Promise<UserProfile> {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select(
-      "id, first_name, last_name, email, avatar_url, role, business_id, businesses(name)"
-    )
-    .eq("id", userId)
-    .single();
+  try {
+    console.log(`Attempting to fetch profile for user ID: ${userId}`);
+    
+    // First try to get merchant profile
+    const { data: merchantProfile, error: merchantError } = await supabase
+      .from("app_92a6ca4590_merchant_profiles")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
 
-  if (error) {
-    if (import.meta.env.MODE === 'development') {
-      console.error("Error fetching user profile:", error);
+    console.log("Merchant profile query result:", { data: merchantProfile, error: merchantError });
+    
+    if (merchantProfile) {
+      console.log("Merchant profile found:", merchantProfile);
+      
+      // Get user roles
+      const { data: userRoles, error: rolesError } = await supabase
+        .from("app_92a6ca4590_user_roles")
+        .select("role:role_id(name)")
+        .eq("user_id", userId);
+        
+      console.log("User roles query result:", { data: userRoles, error: rolesError });
+      
+      // Get user data from auth.users
+      const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId);
+      console.log("User data result:", { data: userData, error: userError });
+      
+      const email = userData?.user?.email || '';
+      const roles = userRoles?.map(r => r.role.name) || [];
+      const role = roles.includes('super_admin') ? 'super_admin' : 
+                  roles.includes('admin') ? 'admin' : 
+                  roles.includes('merchant') ? 'merchant' : 'customer';
+      
+      return {
+        id: userId,
+        firstName: merchantProfile.contact_name || 'User',
+        lastName: '',
+        email: email,
+        avatar_url: null,
+        role: role,
+        business_id: merchantProfile.id,
+        business_name: merchantProfile.business_name,
+      };
     }
+    
+    // If no merchant profile, try to get from legacy profiles table
+    console.log("No merchant profile found, trying legacy profiles table");
+    const { data, error } = await supabase
+      .from("profiles")
+      .select(
+        "id, first_name, last_name, email, avatar_url, role, business_id, businesses(name)"
+      )
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching user profile from legacy table:", JSON.stringify(error));
+      
+      // If no profile found in either table, get user data from auth.users
+      const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId);
+      
+      if (userError) {
+        console.error("Error fetching user data:", JSON.stringify(userError));
+        throw new Error(`Failed to fetch user data: ${userError.message}`);
+      }
+      
+      if (!userData || !userData.user) {
+        throw new Error(`User ID not found: ${userId}`);
+      }
+      
+      // Create minimal profile with available data
+      console.log("Creating minimal profile from user data:", userData);
+      return {
+        id: userId,
+        firstName: 'User',
+        lastName: '',
+        email: userData.user.email || '',
+        avatar_url: null,
+        role: 'customer', // Default role
+        business_id: undefined,
+        business_name: undefined,
+      };
+    }
+
+    if (!data) {
+      console.error("No profile data found in any table for user:", userId);
+      throw new Error(`No profile found for user ID: ${userId}`);
+    }
+
+    console.log("Legacy profile successfully fetched:", JSON.stringify(data));
+
+    return {
+      id: data.id,
+      firstName: data.first_name,
+      lastName: data.last_name,
+      email: data.email,
+      avatar_url: data.avatar_url,
+      role: data.role,
+      business_id: data.business_id,
+      business_name: data.businesses?.name,
+    };
+  } catch (error) {
+    console.error("Exception in fetchUserProfile:", error);
     throw error;
   }
-
-  return {
-    id: data.id,
-    firstName: data.first_name,
-    lastName: data.last_name,
-    email: data.email,
-    avatar_url: data.avatar_url,
-    role: data.role,
-    business_id: data.business_id,
-    business_name: data.businesses?.name,
-  };
 }
 
 export async function getCurrentUser(): Promise<{
@@ -298,21 +402,51 @@ export async function getCurrentUser(): Promise<{
   error: AuthError | null;
 }> {
   try {
+    console.log("getCurrentUser: Getting current session...");
     const { data: sessionData, error: sessionError } =
       await supabase.auth.getSession();
 
-    if (sessionError) throw sessionError;
+    if (sessionError) {
+      console.error("Session error:", sessionError);
+      throw sessionError;
+    }
     
     if (!sessionData.session) {
+      console.log("No active session found");
       return { user: null, error: null }; // No error, but no user either
     }
 
-    const userProfile = await fetchUserProfile(sessionData.session.user.id);
-    return { user: userProfile, error: null };
-  } catch (error) {
-    if (import.meta.env.MODE === 'development') {
-      console.error("Error getting current user:", error);
+    console.log("Session found, user ID:", sessionData.session.user.id);
+    
+    try {
+      const userProfile = await fetchUserProfile(sessionData.session.user.id);
+      console.log("User profile retrieved successfully");
+      return { user: userProfile, error: null };
+    } catch (profileError) {
+      console.error("Error fetching user profile:", profileError);
+      
+      // Create a minimal user object with data from the session
+      const sessionUser = sessionData.session.user;
+      const minimalUser: UserProfile = {
+        id: sessionUser.id,
+        firstName: 'User',
+        lastName: '',
+        email: sessionUser.email || '',
+        avatar_url: null,
+        role: 'customer', // Default role
+      };
+      
+      console.log("Created minimal user profile from session data");
+      return { 
+        user: minimalUser, 
+        error: { 
+          message: "Session exists but profile fetch failed",
+          status: 200 // Partial success
+        }
+      };
     }
+  } catch (error) {
+    console.error("Error getting current user:", error);
     const errorMessage = error instanceof Error ? error.message : "Failed to get current user";
     const errorStatus = (error as { status?: number })?.status;
     return {
