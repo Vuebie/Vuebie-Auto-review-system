@@ -1,0 +1,12 @@
+{
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": { 
+        "buildCommand": "pnpm build",
+        "outputDirectory": "dist" 
+      }
+    }
+  ]
+}

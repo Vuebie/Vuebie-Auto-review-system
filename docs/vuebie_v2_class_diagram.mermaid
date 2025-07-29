@@ -1,0 +1,184 @@
+classDiagram
+    %% Data Models
+    class Role {
+        +string id
+        +string name
+        +string description
+        +boolean is_system_role
+        +string[] parent_role_ids
+        +DateTime created_at
+        +DateTime updated_at
+    }
+    
+    class Permission {
+        +string id
+        +string resource
+        +string[] actions
+        +string description
+        +DateTime created_at
+    }
+    
+    class RolePermission {
+        +string id
+        +string role_id
+        +string permission_id
+        +DateTime created_at
+    }
+    
+    class UserRole {
+        +string id
+        +string user_id
+        +string role_id
+        +string tenant_id
+        +DateTime created_at
+    }
+    
+    class User {
+        +string id
+        +string email
+        +string name
+        +string[] tenant_ids
+        +boolean is_active
+        +DateTime created_at
+        +DateTime updated_at
+    }
+    
+    class Tenant {
+        +string id
+        +string name
+        +string[] owner_ids
+        +boolean is_active
+        +DateTime created_at
+        +DateTime updated_at
+    }
+    
+    class AuditLog {
+        +string id
+        +string user_id
+        +string action
+        +string resource
+        +string resource_id
+        +JSON metadata
+        +string tenant_id
+        +DateTime created_at
+    }
+    
+    %% Services
+    class AuthService {
+        -PermissionCache permissionCache
+        -SupabaseClient supabase
+        +constructor(supabase: SupabaseClient)
+        +login(email: string, password: string): Promise~User~
+        +logout(): Promise~void~
+        +getCurrentUser(): Promise~User~
+        +getUserRoles(userId: string): Promise~Role[]~
+        +checkPermission(userId: string, resource: string, action: string): Promise~boolean~
+        +getAllUserPermissions(userId: string): Promise~Permission[]~
+        +invalidatePermissionCache(userId: string): void
+    }
+    
+    class RoleService {
+        -SupabaseClient supabase
+        -AuditService auditService
+        +constructor(supabase: SupabaseClient, auditService: AuditService)
+        +createRole(role: Role): Promise~Role~
+        +updateRole(id: string, role: Partial~Role~): Promise~Role~
+        +deleteRole(id: string): Promise~void~
+        +getRole(id: string): Promise~Role~
+        +getAllRoles(): Promise~Role[]~
+        +assignPermissionToRole(roleId: string, permissionId: string): Promise~void~
+        +removePermissionFromRole(roleId: string, permissionId: string): Promise~void~
+        +getRolePermissions(roleId: string): Promise~Permission[]~
+    }
+    
+    class PermissionService {
+        -SupabaseClient supabase
+        -AuditService auditService
+        +constructor(supabase: SupabaseClient, auditService: AuditService)
+        +createPermission(permission: Permission): Promise~Permission~
+        +updatePermission(id: string, permission: Partial~Permission~): Promise~Permission~
+        +deletePermission(id: string): Promise~void~
+        +getPermission(id: string): Promise~Permission~
+        +getAllPermissions(): Promise~Permission[]~
+    }
+    
+    class UserService {
+        -SupabaseClient supabase
+        -AuthService authService
+        -AuditService auditService
+        +constructor(supabase: SupabaseClient, authService: AuthService, auditService: AuditService)
+        +createUser(user: User): Promise~User~
+        +updateUser(id: string, user: Partial~User~): Promise~User~
+        +deleteUser(id: string): Promise~void~
+        +getUser(id: string): Promise~User~
+        +getAllUsers(tenantId?: string): Promise~User[]~
+        +assignRoleToUser(userId: string, roleId: string, tenantId: string): Promise~void~
+        +removeRoleFromUser(userId: string, roleId: string): Promise~void~
+        +getUserRoles(userId: string): Promise~Role[]~
+    }
+    
+    class TenantService {
+        -SupabaseClient supabase
+        -AuditService auditService
+        +constructor(supabase: SupabaseClient, auditService: AuditService)
+        +createTenant(tenant: Tenant): Promise~Tenant~
+        +updateTenant(id: string, tenant: Partial~Tenant~): Promise~Tenant~
+        +deleteTenant(id: string): Promise~void~
+        +getTenant(id: string): Promise~Tenant~
+        +getAllTenants(): Promise~Tenant[]~
+        +getUserTenants(userId: string): Promise~Tenant[]~
+    }
+    
+    class AuditService {
+        -SupabaseClient supabase
+        +constructor(supabase: SupabaseClient)
+        +logAction(userId: string, action: string, resource: string, resourceId: string, metadata: any, tenantId?: string): Promise~void~
+        +getAuditLogs(filters: object): Promise~AuditLog[]~
+    }
+    
+    class PermissionCache {
+        -Map~string, CacheEntry~ cache
+        -number cacheTTL
+        +constructor(ttlMs: number)
+        +set(key: string, value: any): void
+        +get(key: string): any | null
+        +invalidate(key: string): void
+        +invalidateByPattern(pattern: string): void
+    }
+
+    %% Hooks and Context Providers
+    class AuthProvider {
+        -AuthService authService
+        -User currentUser
+        -boolean loading
+        +constructor(authService: AuthService)
+        +login(email: string, password: string): Promise~User~
+        +logout(): Promise~void~
+        +checkPermission(resource: string, action: string): boolean
+    }
+    
+    class TenantProvider {
+        -TenantService tenantService
+        -Tenant[] tenants
+        -Tenant currentTenant
+        -boolean loading
+        +constructor(tenantService: TenantService)
+        +setCurrentTenant(tenantId: string): void
+        +getCurrentTenant(): Tenant
+    }
+    
+    %% Relationships
+    User "1" -- "many" UserRole : has
+    Role "1" -- "many" UserRole : assigned to
+    Role "1" -- "many" RolePermission : has
+    Permission "1" -- "many" RolePermission : assigned to
+    Role "many" -- "many" Role : inherits from
+    User "many" -- "many" Tenant : belongs to
+    AuthService -- PermissionCache : uses
+    RoleService -- AuditService : uses
+    PermissionService -- AuditService : uses
+    UserService -- AuthService : uses
+    UserService -- AuditService : uses
+    TenantService -- AuditService : uses
+    AuthProvider -- AuthService : uses
+    TenantProvider -- TenantService : uses

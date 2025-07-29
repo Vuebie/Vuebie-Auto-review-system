@@ -1,0 +1,188 @@
+classDiagram
+    class User {
+        +UUID id
+        +String email
+        +String name
+        +String passwordHash
+        +UUID organizationId
+        +UserRole role
+        +DateTime createdAt
+        +DateTime updatedAt
+        +DateTime lastLogin
+        +JSON settings
+        +String apiKey
+        +authenticate()
+        +updateProfile()
+        +generateAPIKey()
+    }
+    
+    class Organization {
+        +UUID id
+        +String name
+        +SubscriptionTier tier
+        +String billingEmail
+        +DateTime createdAt
+        +DateTime updatedAt
+        +JSON settings
+        +Long storageUsed
+        +Integer apiQuota
+        +Integer apiUsage
+        +addUser(User)
+        +updateSubscription()
+        +calculateUsage()
+    }
+    
+    class Project {
+        +UUID id
+        +String name
+        +UUID organizationId
+        +DateTime createdAt
+        +DateTime updatedAt
+        +String description
+        +JSON settings
+        +Long storageUsed
+        +ProjectStatus status
+        +addVideo()
+        +calculateMetrics()
+        +updateSettings()
+    }
+    
+    class Video {
+        +UUID id
+        +UUID projectId
+        +String filename
+        +Long fileSize
+        +Float duration
+        +String format
+        +String resolution
+        +DateTime createdAt
+        +DateTime updatedAt
+        +VideoStatus status
+        +String storagePath
+        +String thumbnailPath
+        +JSON metadata
+        +analyze(AnalysisType)
+        +generateThumbnail()
+        +getTags()
+    }
+    
+    class Analysis {
+        +UUID id
+        +UUID videoId
+        +AnalysisType type
+        +AnalysisStatus status
+        +DateTime createdAt
+        +DateTime completedAt
+        +String resultsPath
+        +JSON settings
+        +String error
+        +Integer processingTime
+        +start()
+        +cancel()
+        +getResults()
+    }
+    
+    class AnalysisResult {
+        +UUID id
+        +UUID analysisId
+        +String resultType
+        +Float timestamp
+        +Float duration
+        +Float confidence
+        +JSON data
+        +DateTime createdAt
+        +format()
+        +export(ExportFormat)
+    }
+    
+    class Model {
+        +UUID id
+        +String name
+        +String version
+        +ModelType type
+        +String[] capabilities
+        +DateTime createdAt
+        +DateTime updatedAt
+        +ModelStatus status
+        +Boolean isCustom
+        +UUID organizationId
+        +JSON metadata
+        +predict(Input)
+        +getCapabilities()
+    }
+    
+    class CustomModel {
+        +UUID id
+        +UUID modelId
+        +UUID organizationId
+        +String name
+        +UUID trainingDatasetId
+        +Float accuracy
+        +DateTime createdAt
+        +DateTime updatedAt
+        +ModelStatus status
+        +JSON settings
+        +train()
+        +evaluate()
+        +deploy()
+    }
+    
+    class AnalysisService {
+        +scheduleAnalysis(Video, AnalysisType)
+        +trackProgress(UUID)
+        +getResults(UUID)
+        +cancelAnalysis(UUID)
+    }
+    
+    class VideoProcessor {
+        +processVideo(Video)
+        +extractFrames(Video)
+        +detectScenes(Video)
+        +generateThumbnail(Video)
+    }
+    
+    class ModelManager {
+        +loadModel(UUID)
+        +applyModel(Model, Input)
+        +trainCustomModel(Dataset, Settings)
+        +evaluateModel(Model, Dataset)
+    }
+    
+    class APIController {
+        +authenticateRequest(Request)
+        +enforceRateLimits(User)
+        +routeAPIRequest(Request)
+        +formatResponse(Result)
+    }
+    
+    class StorageManager {
+        +storeVideo(File)
+        +retrieveVideo(UUID)
+        +storeResults(UUID, Data)
+        +calculateStorageUsage(UUID)
+    }
+    
+    class PermissionManager {
+        +checkAccess(User, Resource)
+        +assignRole(User, Role)
+        +createPermission(Resource, Action)
+        +enforceOrganizationBoundaries()
+    }
+    
+    Organization "1" --o "many" User
+    Organization "1" --o "many" Project
+    Organization "1" --o "many" CustomModel
+    Project "1" --o "many" Video
+    Video "1" --o "many" Analysis
+    Analysis "1" --o "many" AnalysisResult
+    Model "1" --o "many" Analysis
+    Model "1" -- "1" CustomModel
+    
+    AnalysisService --> Analysis
+    VideoProcessor --> Video
+    ModelManager --> Model
+    ModelManager --> CustomModel
+    APIController --> User
+    StorageManager --> Video
+    StorageManager --> Analysis
+    PermissionManager --> User

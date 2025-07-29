@@ -1,0 +1,108 @@
+sequenceDiagram
+    participant User
+    participant FrontendApp
+    participant APIGateway
+    participant AuthService
+    participant VideoService
+    participant AnalysisService
+    participant ModelService
+    participant StorageService
+    
+    %% User Authentication Flow
+    User->>FrontendApp: Login with credentials
+    FrontendApp->>APIGateway: Authentication request
+    APIGateway->>AuthService: Validate credentials
+    AuthService-->>APIGateway: Return JWT token
+    APIGateway-->>FrontendApp: Return authentication result
+    FrontendApp-->>User: Display dashboard
+    
+    %% Video Upload Flow
+    User->>FrontendApp: Upload video
+    FrontendApp->>APIGateway: Upload request with metadata
+    APIGateway->>AuthService: Validate permissions
+    AuthService-->>APIGateway: Permission granted
+    APIGateway->>VideoService: Process video upload
+    VideoService->>StorageService: Store video file
+    StorageService-->>VideoService: Return storage reference
+    VideoService->>VideoService: Generate thumbnail
+    VideoService-->>APIGateway: Return video metadata
+    APIGateway-->>FrontendApp: Upload complete confirmation
+    FrontendApp-->>User: Display video in library
+    
+    %% Video Analysis Flow
+    User->>FrontendApp: Request analysis
+    FrontendApp->>APIGateway: Analysis request
+    APIGateway->>AuthService: Validate permissions
+    AuthService-->>APIGateway: Permission granted
+    APIGateway->>AnalysisService: Schedule analysis
+    AnalysisService->>VideoService: Get video reference
+    VideoService-->>AnalysisService: Return video reference
+    AnalysisService->>ModelService: Load required models
+    ModelService-->>AnalysisService: Models ready
+    AnalysisService->>AnalysisService: Begin analysis process
+    AnalysisService-->>APIGateway: Return analysis job ID
+    APIGateway-->>FrontendApp: Analysis initiated
+    FrontendApp-->>User: Display analysis status
+    
+    %% Analysis Progress Tracking
+    FrontendApp->>APIGateway: Poll analysis status
+    APIGateway->>AnalysisService: Request job status
+    AnalysisService-->>APIGateway: Return current status
+    APIGateway-->>FrontendApp: Status update
+    FrontendApp-->>User: Update progress indicator
+    
+    %% Analysis Completion
+    AnalysisService->>StorageService: Store analysis results
+    StorageService-->>AnalysisService: Return storage reference
+    AnalysisService->>AnalysisService: Mark analysis complete
+    
+    %% Result Retrieval
+    FrontendApp->>APIGateway: Poll analysis status
+    APIGateway->>AnalysisService: Request job status
+    AnalysisService-->>APIGateway: Return completed status
+    APIGateway-->>FrontendApp: Analysis complete
+    FrontendApp->>APIGateway: Request analysis results
+    APIGateway->>AnalysisService: Get analysis results
+    AnalysisService-->>APIGateway: Return result data
+    APIGateway-->>FrontendApp: Analysis results
+    FrontendApp-->>User: Display analysis results
+    
+    %% Custom Model Training Flow
+    User->>FrontendApp: Request custom model training
+    FrontendApp->>APIGateway: Training request
+    APIGateway->>AuthService: Validate permissions
+    AuthService-->>APIGateway: Permission granted
+    APIGateway->>ModelService: Initialize training job
+    ModelService->>StorageService: Access training data
+    StorageService-->>ModelService: Training data reference
+    ModelService->>ModelService: Begin training process
+    ModelService-->>APIGateway: Return training job ID
+    APIGateway-->>FrontendApp: Training initiated
+    FrontendApp-->>User: Display training status
+    
+    %% Training Progress Tracking
+    FrontendApp->>APIGateway: Poll training status
+    APIGateway->>ModelService: Request job status
+    ModelService-->>APIGateway: Return current status
+    APIGateway-->>FrontendApp: Status update
+    FrontendApp-->>User: Update progress indicator
+    
+    %% Training Completion
+    ModelService->>ModelService: Evaluate model performance
+    ModelService->>StorageService: Store model weights
+    StorageService-->>ModelService: Return storage reference
+    ModelService->>ModelService: Mark training complete
+    
+    %% Model Deployment
+    FrontendApp->>APIGateway: Poll training status
+    APIGateway->>ModelService: Request job status
+    ModelService-->>APIGateway: Return completed status
+    APIGateway-->>FrontendApp: Training complete
+    FrontendApp-->>User: Display training results
+    User->>FrontendApp: Request model deployment
+    FrontendApp->>APIGateway: Deployment request
+    APIGateway->>ModelService: Deploy custom model
+    ModelService->>ModelService: Activate model
+    ModelService-->>APIGateway: Model deployed
+    APIGateway-->>FrontendApp: Deployment confirmation
+    FrontendApp-->>User: Model ready for use

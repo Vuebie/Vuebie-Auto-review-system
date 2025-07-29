@@ -1,0 +1,93 @@
+sequenceDiagram
+    participant Client
+    participant AuthProvider
+    participant TenantProvider
+    participant AuthService
+    participant PermissionCache
+    participant Supabase
+    participant RoleService
+    participant UserService
+    participant AuditService
+
+    %% User Authentication Flow
+    Client->>AuthProvider: login(email, password)
+    AuthProvider->>AuthService: login(email, password)
+    AuthService->>Supabase: signIn(email, password)
+    Supabase-->>AuthService: session
+    AuthService->>Supabase: getUserProfile(session.user.id)
+    Supabase-->>AuthService: userProfile
+    AuthService-->>AuthProvider: user
+    AuthProvider-->>Client: user
+
+    %% Permission Check Flow
+    Client->>AuthProvider: checkPermission("campaign", "read")
+    AuthProvider->>AuthService: checkPermission(userId, "campaign", "read")
+    AuthService->>PermissionCache: get("user_perm_" + userId)
+    
+    alt Cache hit
+        PermissionCache-->>AuthService: cachedPermissions
+        AuthService->>AuthService: evaluatePermission(cachedPermissions, "campaign", "read")
+    else Cache miss
+        PermissionCache-->>AuthService: null
+        AuthService->>Supabase: fetchUserRoles(userId)
+        Supabase-->>AuthService: userRoles
+        
+        loop For each role
+            AuthService->>Supabase: fetchRolePermissions(roleId)
+            Supabase-->>AuthService: rolePermissions
+            AuthService->>Supabase: fetchRoleHierarchy(roleId)
+            Supabase-->>AuthService: parentRoles
+            
+            loop For each parent role
+                AuthService->>Supabase: fetchRolePermissions(parentRoleId)
+                Supabase-->>AuthService: parentRolePermissions
+            end
+        end
+        
+        AuthService->>PermissionCache: set("user_perm_" + userId, allPermissions)
+        AuthService->>AuthService: evaluatePermission(allPermissions, "campaign", "read")
+    end
+    
+    AuthService-->>AuthProvider: permissionResult
+    AuthProvider-->>Client: permissionResult
+    
+    %% Role Management Flow
+    Client->>RoleService: assignPermissionToRole(roleId, permissionId)
+    RoleService->>RoleService: validateRequest()
+    RoleService->>Supabase: insertRolePermission(roleId, permissionId)
+    Supabase-->>RoleService: result
+    RoleService->>AuditService: logAction(userId, "assign_permission", "role", roleId, metadata)
+    AuditService->>Supabase: insertAuditLog(...)
+    Supabase-->>AuditService: result
+    
+    %% Role Permission Change Triggers Cache Invalidation
+    Supabase->>Supabase: trigger_on_role_permission_change()
+    Supabase->>AuthService: notifyPermissionChange(roleId)
+    AuthService->>AuthService: findUsersWithRole(roleId)
+    
+    loop For each affected user
+        AuthService->>PermissionCache: invalidate("user_perm_" + affectedUserId)
+    end
+    
+    RoleService-->>Client: success
+    
+    %% User Role Assignment Flow
+    Client->>UserService: assignRoleToUser(userId, roleId, tenantId)
+    UserService->>AuthService: checkPermission(currentUserId, "user_role", "assign")
+    AuthService-->>UserService: permissionGranted
+    UserService->>Supabase: insertUserRole(userId, roleId, tenantId)
+    Supabase-->>UserService: result
+    UserService->>AuditService: logAction(currentUserId, "assign_role", "user", userId, metadata)
+    UserService->>AuthService: invalidatePermissionCache(userId)
+    AuthService->>PermissionCache: invalidate("user_perm_" + userId)
+    UserService-->>Client: success
+    
+    %% Tenant Data Access Flow with RLS
+    Client->>TenantProvider: setCurrentTenant(tenantId)
+    TenantProvider->>Supabase: getTenant(tenantId)
+    Supabase-->>TenantProvider: tenant
+    TenantProvider->>Client: success
+    
+    Client->>Supabase: fetchData("campaigns")
+    Supabase->>Supabase: applyRLS(tenantId, userId)
+    Supabase-->>Client: filteredCampaigns
