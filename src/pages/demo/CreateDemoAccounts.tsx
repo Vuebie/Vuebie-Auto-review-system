@@ -17,6 +17,8 @@ interface Credentials {
 }
 
 export default function CreateDemoAccounts() {
+  console.log('🚀 [COMPONENT MOUNT] CreateDemoAccounts component is mounting...');
+  
   const { t } = useTranslation();
   const [merchantCredentials, setMerchantCredentials] = useState<Credentials | null>(null);
   const [adminCredentials, setAdminCredentials] = useState<Credentials | null>(null);
@@ -26,6 +28,8 @@ export default function CreateDemoAccounts() {
   const [copiedMerchantPassword, setCopiedMerchantPassword] = useState(false);
   const [copiedAdminEmail, setCopiedAdminEmail] = useState(false);
   const [copiedAdminPassword, setCopiedAdminPassword] = useState(false);
+  
+  console.log('🚀 [COMPONENT STATE] Component state initialized');
 
   // Helper function to call the secure Edge Function for demo account creation
   const createDemoAccountsSecure = async (type: 'merchant' | 'admin', count: number = 1) => {
@@ -114,8 +118,15 @@ export default function CreateDemoAccounts() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  console.log('🚀 [COMPONENT RENDER] CreateDemoAccounts is rendering...');
+  
   return (
     <div className="container max-w-4xl py-10">
+      <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <h2 className="text-lg font-semibold text-blue-800">🔧 DEBUG MODE ACTIVE</h2>
+        <p className="text-blue-600">Component loaded successfully. Check console for detailed logs.</p>
+      </div>
+      
       <h1 className="text-3xl font-bold mb-6">{t('demo.create_demo_accounts')}</h1>
       <p className="text-muted-foreground mb-8">
         {t('demo.accounts_description')}
