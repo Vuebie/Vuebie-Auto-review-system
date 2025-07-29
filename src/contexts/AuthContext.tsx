@@ -34,31 +34,66 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const loadUser = async () => {
     setLoading(true);
     try {
-      const user = await getCurrentUser();
+      const { user: userProfile, error } = await getCurrentUser();
+      
+      if (error) {
+        console.error('Authentication error:', error);
+        setUser(null);
+        return;
+      }
+      
+      // Convert UserProfile to User type for compatibility
+      const user = userProfile ? {
+        id: userProfile.id,
+        email: userProfile.email,
+        role: userProfile.role
+      } as User : null;
+      
       setUser(user);
 
       if (user) {
-        // Load merchant profile
-        const { data: profile } = await supabase
-          .from(TABLES.MERCHANT_PROFILES)
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-        
-        setProfile(profile);
+        try {
+          // Load merchant profile
+          const { data: profile, error: profileError } = await supabase
+            .from(TABLES.MERCHANT_PROFILES)
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (profileError && profileError.code !== 'PGRST116') { // PGRST116 = no rows returned
+            console.error('Error loading merchant profile:', profileError);
+          }
+          setProfile(profile);
 
-        // Load user roles
-        const { data: userRoles } = await supabase
-          .from(TABLES.USER_ROLES)
-          .select('role:role_id(name)')
-          .eq('user_id', user.id);
-        
-        if (userRoles) {
-          const roleNames = userRoles.map((r: { role: { name: string } }) => r.role.name);
-          setRoles(roleNames);
-          setHasMerchantRole(roleNames.includes('merchant'));
-          setHasAdminRole(roleNames.includes('admin'));
-          setHasSuperAdminRole(roleNames.includes('super_admin'));
+          // Load user roles
+          const { data: userRoles, error: rolesError } = await supabase
+            .from(TABLES.USER_ROLES)
+            .select('role:role_id(name)')
+            .eq('user_id', user.id);
+          
+          if (rolesError) {
+            console.error('Error loading user roles:', rolesError);
+            // Set default role based on user profile
+            const defaultRoles = [userProfile.role || 'customer'];
+            setRoles(defaultRoles);
+            setHasMerchantRole(defaultRoles.includes('merchant'));
+            setHasAdminRole(defaultRoles.includes('admin'));
+            setHasSuperAdminRole(defaultRoles.includes('super_admin'));
+          } else if (userRoles) {
+            const roleNames = userRoles.map((r: { role: { name: string } }) => r.role.name);
+            setRoles(roleNames);
+            setHasMerchantRole(roleNames.includes('merchant'));
+            setHasAdminRole(roleNames.includes('admin'));
+            setHasSuperAdminRole(roleNames.includes('super_admin'));
+          }
+        } catch (roleError) {
+          console.error('Error in role loading:', roleError);
+          // Fallback to profile role
+          const fallbackRole = userProfile.role || 'customer';
+          setRoles([fallbackRole]);
+          setHasMerchantRole(fallbackRole === 'merchant');
+          setHasAdminRole(['admin', 'super_admin'].includes(fallbackRole));
+          setHasSuperAdminRole(fallbackRole === 'super_admin');
         }
       } else {
         setProfile(null);
@@ -69,6 +104,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     } catch (error) {
       console.error('Error loading user:', error);
+      // Clear all user state on error
+      setUser(null);
+      setProfile(null);
+      setRoles([]);
+      setHasMerchantRole(false);
+      setHasAdminRole(false);
+      setHasSuperAdminRole(false);
     } finally {
       setLoading(false);
     }
@@ -88,7 +130,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.auth.session()?.access_token}`
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
         },
         body: JSON.stringify({ resource, action })
       });

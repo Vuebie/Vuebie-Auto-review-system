@@ -37,7 +37,9 @@ export async function signInWithEmail(email: string, password: string): Promise<
     const userProfile = await fetchUserProfile(data.user.id);
     return { user: userProfile, error: null };
   } catch (error) {
-    console.error("Error signing in with email:", error);
+    if (import.meta.env.MODE === 'development') {
+      console.error("Error signing in with email:", error);
+    }
     const errorMessage = error instanceof Error ? error.message : "Failed to sign in";
     const errorStatus = (error as { status?: number })?.status;
     return {
@@ -65,7 +67,9 @@ export async function signInWithProvider(provider: "google" | "github"): Promise
 
     return { error: null };
   } catch (error) {
-    console.error("Error signing in with provider:", error);
+    if (import.meta.env.MODE === 'development') {
+      console.error("Error signing in with provider:", error);
+    }
     const errorMessage = error instanceof Error ? error.message : `Failed to sign in with ${provider}`;
     const errorStatus = (error as { status?: number })?.status;
     return {
@@ -129,7 +133,9 @@ export async function signUp(
       error: null,
     };
   } catch (error) {
-    console.error("Error signing up:", error);
+    if (import.meta.env.MODE === 'development') {
+      console.error("Error signing up:", error);
+    }
     const errorMessage = error instanceof Error ? error.message : "Failed to sign up";
     const errorStatus = (error as { status?: number })?.status;
     return {
@@ -150,7 +156,9 @@ export async function signOut(): Promise<{
     if (error) throw error;
     return { error: null };
   } catch (error) {
-    console.error("Error signing out:", error);
+    if (import.meta.env.MODE === 'development') {
+      console.error("Error signing out:", error);
+    }
     const errorMessage = error instanceof Error ? error.message : "Failed to sign out";
     const errorStatus = (error as { status?: number })?.status;
     return {
@@ -173,7 +181,9 @@ export async function resetPassword(
     if (error) throw error;
     return { error: null };
   } catch (error) {
-    console.error("Error resetting password:", error);
+    if (import.meta.env.MODE === 'development') {
+      console.error("Error resetting password:", error);
+    }
     const errorMessage = error instanceof Error ? error.message : "Failed to send password reset email";
     const errorStatus = (error as { status?: number })?.status;
     return {
@@ -196,7 +206,9 @@ export async function updatePassword(
     if (error) throw error;
     return { error: null };
   } catch (error) {
-    console.error("Error updating password:", error);
+    if (import.meta.env.MODE === 'development') {
+      console.error("Error updating password:", error);
+    }
     const errorMessage = error instanceof Error ? error.message : "Failed to update password";
     const errorStatus = (error as { status?: number })?.status;
     return {
@@ -236,7 +248,9 @@ export async function updateProfile(
     const userProfile = await fetchUserProfile(userId);
     return { user: userProfile, error: null };
   } catch (error) {
-    console.error("Error updating profile:", error);
+    if (import.meta.env.MODE === 'development') {
+      console.error("Error updating profile:", error);
+    }
     const errorMessage = error instanceof Error ? error.message : "Failed to update profile";
     const errorStatus = (error as { status?: number })?.status;
     return {
@@ -261,7 +275,9 @@ export async function fetchUserProfile(
     .single();
 
   if (error) {
-    console.error("Error fetching user profile:", error);
+    if (import.meta.env.MODE === 'development') {
+      console.error("Error fetching user profile:", error);
+    }
     throw error;
   }
 
@@ -294,7 +310,9 @@ export async function getCurrentUser(): Promise<{
     const userProfile = await fetchUserProfile(sessionData.session.user.id);
     return { user: userProfile, error: null };
   } catch (error) {
-    console.error("Error getting current user:", error);
+    if (import.meta.env.MODE === 'development') {
+      console.error("Error getting current user:", error);
+    }
     const errorMessage = error instanceof Error ? error.message : "Failed to get current user";
     const errorStatus = (error as { status?: number })?.status;
     return {
@@ -307,171 +325,6 @@ export async function getCurrentUser(): Promise<{
   }
 }
 
-export async function createDemoAccounts(
-  type: "merchant" | "admin",
-  count: number
-): Promise<
-  | {
-      accounts: Array<{ email: string; password: string; role: string }>;
-      error: null;
-    }
-  | { accounts: null; error: { message: string } }
-> {
-  try {
-    const accounts = [];
-    const timestamp = Date.now();
-
-    for (let i = 0; i < count; i++) {
-      const email = `demo_${type}_${timestamp}_${i + 1}@example.com`;
-      const password = `Demo${type}${timestamp}${i + 1}`;
-      const role = type === "merchant" ? "merchant" : "admin";
-      
-      // Create auth user
-      const { data: userData, error: userError } = await supabase.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-      });
-
-      if (userError) {
-        console.error(`Error creating demo ${type} user:`, userError);
-        continue;
-      }
-
-      // Create profile
-      const { error: profileError } = await supabase.from("profiles").insert([
-        {
-          id: userData.user.id,
-          first_name: `Demo`,
-          last_name: `${type.charAt(0).toUpperCase() + type.slice(1)} ${i + 1}`,
-          email,
-          role,
-        },
-      ]);
-
-      if (profileError) {
-        console.error(`Error creating demo ${type} profile:`, profileError);
-        continue;
-      }
-
-      // If creating a merchant, also create a business
-      if (type === "merchant") {
-        const { data: businessData, error: businessError } = await supabase
-          .from("businesses")
-          .insert([
-            {
-              name: `Demo Business ${i + 1}`,
-              owner_id: userData.user.id,
-            },
-          ])
-          .select();
-
-        if (businessError) {
-          console.error("Error creating demo business:", businessError);
-          continue;
-        }
-
-        // Update user profile with business ID
-        if (businessData && businessData[0]) {
-          const { error: updateError } = await supabase
-            .from("profiles")
-            .update({ business_id: businessData[0].id })
-            .eq("id", userData.user.id);
-
-          if (updateError) {
-            console.error("Error updating user with business ID:", updateError);
-          }
-        }
-      }
-
-      accounts.push({ email, password, role });
-    }
-
-    return { accounts, error: null };
-  } catch (error) {
-    console.error("Error creating demo accounts:", error);
-    return {
-      accounts: null,
-      error: {
-        message: error instanceof Error ? error.message : "Unknown error occurred",
-      },
-    };
-  }
-}
-
-export async function createSpecificUser(params: {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  businessName?: string;
-}): Promise<{ email: string; password: string; role: string }> {
-  try {
-    const { email, password, firstName, lastName, role, businessName } = params;
-
-    // Create auth user
-    const { data: userData, error: userError } = await supabase.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    });
-
-    if (userError) {
-      console.error("Error creating specific user:", userError);
-      throw userError;
-    }
-
-    // Create profile
-    const { error: profileError } = await supabase.from("profiles").insert([
-      {
-        id: userData.user.id,
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        role,
-      },
-    ]);
-
-    if (profileError) {
-      console.error("Error creating user profile:", profileError);
-      throw profileError;
-    }
-
-    // If creating a merchant, also create a business
-    if (role === "merchant" && businessName) {
-      const { data: businessData, error: businessError } = await supabase
-        .from("businesses")
-        .insert([
-          {
-            name: businessName,
-            owner_id: userData.user.id,
-          },
-        ])
-        .select();
-
-      if (businessError) {
-        console.error("Error creating business:", businessError);
-        throw businessError;
-      }
-
-      // Update user profile with business ID
-      if (businessData && businessData[0]) {
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({ business_id: businessData[0].id })
-          .eq("id", userData.user.id);
-
-        if (updateError) {
-          console.error("Error updating user with business ID:", updateError);
-          throw updateError;
-        }
-      }
-    }
-
-    return { email, password, role };
-  } catch (error) {
-    console.error("Error in createSpecificUser:", error);
-    throw error;
-  }
-}
+// SECURITY: Admin functions have been removed from client-side code
+// These functions should only exist in secure backend/Edge Functions
+// Demo account creation has been moved to development utilities only

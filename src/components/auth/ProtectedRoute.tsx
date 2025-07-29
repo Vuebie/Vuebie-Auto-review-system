@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Spinner } from '@/components/ui/spinner';
+import { errorMonitor } from '@/lib/error-monitoring';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -12,7 +13,7 @@ export default function ProtectedRoute({
   children, 
   requiredRoles = ['merchant', 'admin', 'super_admin'] 
 }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  const { user, loading, roles, hasMerchantRole, hasAdminRole, hasSuperAdminRole } = useAuth();
   const location = useLocation();
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
@@ -36,18 +37,37 @@ export default function ProtectedRoute({
 
   // If not logged in, redirect to login
   if (!user) {
+    errorMonitor.logError('Unauthorized access attempt', {
+      attemptedPath: location.pathname,
+      userId: 'anonymous'
+    });
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
-  // If roles are required and user doesn't have one of them, redirect
-  const hasRequiredRole = requiredRoles.some(role => 
-    role === 'merchant' ? user.role === 'merchant' : 
-    role === 'admin' ? ['admin', 'super_admin'].includes(user.role || '') :
-    role === 'super_admin' ? user.role === 'super_admin' : false
-  );
+  // Enhanced role checking using the auth context role flags
+  const hasRequiredRole = requiredRoles.some(role => {
+    switch (role) {
+      case 'merchant':
+        return hasMerchantRole || roles.includes('merchant');
+      case 'admin':
+        return hasAdminRole || roles.includes('admin');
+      case 'super_admin':
+        return hasSuperAdminRole || roles.includes('super_admin');
+      case 'customer':
+        return roles.includes('customer');
+      default:
+        return false;
+    }
+  });
 
   if (!hasRequiredRole) {
-    return <Navigate to="/" replace />;
+    errorMonitor.logError('Insufficient permissions', {
+      userId: user.id,
+      userRoles: roles,
+      requiredRoles: requiredRoles,
+      attemptedPath: location.pathname
+    });
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return <>{children}</>;

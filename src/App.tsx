@@ -4,7 +4,12 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { setupGlobalErrorHandling } from '@/lib/error-monitoring';
 import './i18n'; // Initialize i18n
+
+// Setup global error handling
+setupGlobalErrorHandling();
 
 // Layouts
 import MainLayout from './components/layout/MainLayout';
@@ -33,6 +38,7 @@ const SubscriptionPage = lazy(() => import('./pages/dashboard/SubscriptionPage')
 const ReviewPage = lazy(() => import('./pages/review/ReviewPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const CreateDemoAccountsPage = lazy(() => import('./pages/demo/CreateDemoAccounts'));
+const UnauthorizedPage = lazy(() => import('./pages/UnauthorizedPage'));
 
 // Admin pages
 const AdminRoutes = lazy(() => import('./pages/admin'));
@@ -42,27 +48,29 @@ const queryClient = new QueryClient();
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <BrowserRouter>
-            <Suspense 
-              fallback={
-                <MainLayout>
-                  <div className="flex items-center justify-center h-screen">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </div>
-                </MainLayout>
-              }
-            >
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<HomePage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-                <Route path="/review" element={<ReviewPage />} />
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <BrowserRouter>
+              <Suspense 
+                fallback={
+                  <MainLayout>
+                    <div className="flex items-center justify-center h-screen">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                  </MainLayout>
+                }
+              >
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
+                  <Route path="/review" element={<ReviewPage />} />
+                  <Route path="/unauthorized" element={<UnauthorizedPage />} />
                 
                 {/* Secured Demo Routes */}
                 <Route path="/demo/accounts" element={
@@ -167,5 +175,6 @@ export default function App() {
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
