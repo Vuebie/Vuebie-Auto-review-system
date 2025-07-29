@@ -29,12 +29,17 @@ export default function CreateDemoAccounts() {
 
   // Helper function to call the secure Edge Function for demo account creation
   const createDemoAccountsSecure = async (type: 'merchant' | 'admin', count: number = 1) => {
+    console.log('🔍 [DEBUG] createDemoAccountsSecure called with:', { type, count });
+    
     const { data: session } = await supabase.auth.getSession();
+    console.log('🔍 [DEBUG] Session check:', { hasSession: !!session.session });
     
     if (!session.session?.access_token) {
+      console.error('❌ [ERROR] No access token found');
       throw new Error('Authentication required');
     }
 
+    console.log('🔍 [DEBUG] Making request to edge function...');
     const response = await fetch(`${supabase.supabaseUrl}/functions/v1/app_08dd1da2ac_create_demo_accounts`, {
       method: 'POST',
       headers: {
@@ -47,16 +52,21 @@ export default function CreateDemoAccounts() {
       }),
     });
 
+    console.log('🔍 [DEBUG] Response status:', response.status);
     const result = await response.json();
+    console.log('🔍 [DEBUG] Response data:', result);
 
     if (!response.ok) {
-      throw new Error(result.message || 'Failed to create demo accounts');
+      console.error('❌ [ERROR] Response not ok:', result);
+      throw new Error(result.message || result.error || 'Failed to create demo accounts');
     }
 
     if (!result.success) {
+      console.error('❌ [ERROR] Result not successful:', result);
       throw new Error(result.error || 'Unknown error occurred');
     }
 
+    console.log('✅ [SUCCESS] Demo accounts created successfully');
     return result;
   };
 
