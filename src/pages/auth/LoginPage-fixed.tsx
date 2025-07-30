@@ -5,9 +5,9 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase-client-enhanced';
+import { supabase } from '@/lib/supabase-unified';
 import { securityMonitor } from '@/lib/security-monitoring';
-import { mfaHelper } from '@/lib/mfa-helper';
+import { mfaHelper } from '@/lib/mfa-helper-fixed';
 
 import {
   Form,
