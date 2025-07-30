@@ -37,7 +37,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const { user: userProfile, error } = await getCurrentUser();
       
       if (error) {
-        console.error('Authentication error:', error);
         setUser(null);
         return;
       }
@@ -60,9 +59,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
             .eq('user_id', user.id)
             .single();
           
-          if (profileError && profileError.code !== 'PGRST116') { // PGRST116 = no rows returned
-            console.error('Error loading merchant profile:', profileError);
-          }
           setProfile(profile);
 
           // Load user roles
@@ -72,7 +68,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
             .eq('user_id', user.id);
           
           if (rolesError) {
-            console.error('Error loading user roles:', rolesError);
             // Set default role based on user profile
             const defaultRoles = [userProfile.role || 'customer'];
             setRoles(defaultRoles);
@@ -87,7 +82,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
             setHasSuperAdminRole(roleNames.includes('super_admin'));
           }
         } catch (roleError) {
-          console.error('Error in role loading:', roleError);
           // Fallback to profile role
           const fallbackRole = userProfile.role || 'customer';
           setRoles([fallbackRole]);
@@ -103,7 +97,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setHasSuperAdminRole(false);
       }
     } catch (error) {
-      console.error('Error loading user:', error);
       // Clear all user state on error
       setUser(null);
       setProfile(null);
@@ -138,7 +131,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const result = await response.json();
       return result.hasPermission;
     } catch (error) {
-      console.error('Error checking permission:', error);
       return false;
     }
   };

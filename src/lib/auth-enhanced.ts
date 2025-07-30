@@ -2,6 +2,7 @@ import { supabase } from './supabase-client';
 import { securityMonitor } from './security-monitoring';
 import { enhancedErrorMonitor } from './enhanced-error-monitoring';
 import { TABLES } from './supabase-client-enhanced';
+import { User, Session } from '@supabase/supabase-js';
 
 export interface AuthError {
   message: string;
@@ -9,9 +10,9 @@ export interface AuthError {
 }
 
 export interface AuthResult {
-  user: any | null;
+  user: User | null;
   error: AuthError | null;
-  session?: any;
+  session?: Session;
 }
 
 export interface ResetResult {
@@ -29,7 +30,7 @@ export interface UserMetadata {
   lastName?: string;
   businessName?: string;
   role?: string;
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface ValidationResult {

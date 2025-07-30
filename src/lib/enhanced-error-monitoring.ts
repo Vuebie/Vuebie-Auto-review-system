@@ -107,7 +107,7 @@ class EnhancedErrorMonitor {
   /**
    * Get recent security events
    */
-  public async getRecentSecurityEvents(count: number = 10): Promise<any[]> {
+  public async getRecentSecurityEvents(count: number = 10): Promise<Record<string, unknown>[]> {
     return securityMonitor.getRecentSecurityEvents({
       limit: count
     });
@@ -116,7 +116,7 @@ class EnhancedErrorMonitor {
   /**
    * Get high severity security events
    */
-  public getHighSeverityEvents(): any[] {
+  public getHighSeverityEvents(): Record<string, unknown>[] {
     return securityMonitor.getHighSeverityEvents();
   }
 
