@@ -1,19 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Supabase configuration - loading from Vite environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Supabase configuration - trying both naming conventions for maximum compatibility
+const supabaseUrl = import.meta.env.SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.SUPABASE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Ensure environment variables are provided
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables. Check .env file.');
-  throw new Error('Missing required environment variables: VITE_SUPABASE_URL and/or VITE_SUPABASE_ANON_KEY');
+if (!supabaseUrl || !supabaseKey) {
+  console.error('⚠️ Missing Supabase environment variables. Check your .env file.');
+  throw new Error('Missing required Supabase environment variables');
 }
 
 // Create Supabase client
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Define table names in a central location for easy management
+// Database table names
 export const TABLES = {
   // Core tables
   MERCHANT_PROFILES: "app_92a6ca4590_merchant_profiles",
@@ -44,191 +44,6 @@ export const FUNCTIONS = {
   MANAGE_USER_ROLE: `${supabaseUrl}/functions/v1/app_92a6ca4590_manage_user_role`
 };
 
-// Types for database tables
-export interface Outlet {
-  id: string;
-  merchant_id: string;
-  name: string;
-  address?: string;
-  contact_phone?: string;
-  contact_email?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface QRCode {
-  id: string;
-  outlet_id: string;
-  merchant_id: string;
-  name: string;
-  created_at: string;
-  updated_at: string;
-  active: boolean;
-}
-
-export interface AITemplate {
-  id: string;
-  merchant_id: string;
-  name: string;
-  prompt: string;
-  language: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Incentive {
-  id: string;
-  merchant_id: string;
-  name: string;
-  description?: string;
-  type: 'voucher' | 'discount' | 'points' | 'lucky_draw' | 'free_item';
-  code_prefix?: string;
-  value?: number;
-  expires_at?: string;
-  active: boolean;
-  min_rating?: number;
-  min_review_length?: number;
-  max_per_user?: number;
-  redemption_instructions?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ReviewSession {
-  id: string;
-  qr_code_id: string;
-  outlet_id: string;
-  merchant_id: string;
-  device_fingerprint: string;
-  session_language: string;
-  review_text?: string;
-  review_posted: boolean;
-  incentive_id?: string;
-  incentive_claimed: boolean;
-  incentive_code?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface UserRole {
-  id: string;
-  user_id: string;
-  role_id: string;
-  created_at: string;
-}
-
-export interface Role {
-  id: string;
-  name: string;
-  description: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface MerchantProfile {
-  id: string;
-  user_id: string;
-  business_name: string;
-  business_description?: string;
-  contact_name?: string;
-  email?: string;
-  phone?: string;
-  website?: string;
-  address?: string;
-  subscription_tier: 'free' | 'basic' | 'premium';
-  role?: string;
-  mfa_enabled?: boolean;
-  mfa_secret?: string;
-  mfa_recovery_codes?: string[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface UserSettings {
-  id: string;
-  user_id: string;
-  preferred_language: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Permission {
-  id: string;
-  resource: string;
-  action: string;
-  description: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface RolePermission {
-  id: string;
-  role_id: string;
-  permission_id: string;
-  created_at: string;
-}
-
-export interface AuditLog {
-  id: string;
-  user_id: string;
-  action_type: string;
-  resource_type: string;
-  resource_id: string | null;
-  details: Record<string, unknown>;
-  created_at: string;
-}
-
-export interface Campaign {
-  id: string;
-  merchant_id: string;
-  name: string;
-  description?: string;
-  start_date: string;
-  end_date?: string;
-  active: boolean;
-  incentive_id?: string;
-  ai_template_id?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CampaignOutlet {
-  id: string;
-  campaign_id: string;
-  outlet_id: string;
-  created_at: string;
-}
-
-export interface RateLimit {
-  id: string;
-  identifier: string;
-  action: string;
-  created_at: string;
-}
-
-export interface SecurityEvent {
-  id: string;
-  event_type: string;
-  severity: string;
-  user_id: string;
-  ip_address: string;
-  user_agent: string;
-  url: string;
-  session_id: string;
-  details: Record<string, unknown>;
-  created_at: string;
-}
-
-export interface LoginHistory {
-  id: string;
-  user_id: string;
-  ip_address: string;
-  user_agent: string;
-  location: string;
-  success: boolean;
-  created_at: string;
-}
-
 /**
  * Get the current session with secure error handling
  */
@@ -249,50 +64,30 @@ export async function getCurrentSession() {
  * Check if Supabase is properly configured
  */
 export function isSupabaseConfigured(): boolean {
-  return Boolean(supabaseUrl && supabaseAnonKey);
+  return Boolean(supabaseUrl && supabaseKey);
 }
 
 /**
- * Check if user has permission for a resource/action
+ * Test Supabase connection
  */
-export async function checkPermission(resource: string, action: string): Promise<boolean> {
+export async function testSupabaseConnection() {
   try {
-    // Get current user
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError || !userData.user) {
-      return false;
+    // Simple query to test connection
+    const { data, error } = await supabase.from(TABLES.MERCHANT_PROFILES).select('count(*)');
+    if (error) {
+      return {
+        success: false,
+        error: error.message
+      };
     }
-    
-    // Get user's roles
-    const { data: roles, error: rolesError } = await supabase
-      .from(TABLES.USER_ROLES)
-      .select(`
-        ${TABLES.ROLES}!inner(*)
-      `)
-      .eq('user_id', userData.user.id);
-      
-    if (rolesError || !roles || roles.length === 0) {
-      return false;
-    }
-    
-    // Extract role IDs
-    const roleIds = roles.map(r => r[TABLES.ROLES].id);
-    
-    // Check if any role has the required permission
-    const { data: permissions, error: permissionsError } = await supabase
-      .from(TABLES.PERMISSIONS)
-      .select('*')
-      .in('role_id', roleIds)
-      .eq('resource', resource)
-      .eq('action', action);
-      
-    if (permissionsError || !permissions || permissions.length === 0) {
-      return false;
-    }
-    
-    return true;
+    return {
+      success: true,
+      data
+    };
   } catch (error) {
-    console.error("Permission check failed:", error);
-    return false;
+    return {
+      success: false,
+      error: error.message
+    };
   }
 }

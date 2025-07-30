@@ -1,5 +1,4 @@
-import { supabase } from './supabase-client';
-import { TABLES } from './supabase-client-enhanced';
+import { supabase, TABLES } from './supabase-unified';
 
 export type SecurityEventSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 

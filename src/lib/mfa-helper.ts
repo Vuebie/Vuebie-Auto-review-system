@@ -1,5 +1,4 @@
-import { supabase } from './supabase-client';
-import { TABLES } from './supabase-client-enhanced';
+import { supabase, TABLES } from './supabase-unified';
 import { securityMonitor } from './security-monitoring';
 import { nanoid } from 'nanoid';
 import * as OTPAuth from 'otpauth';
