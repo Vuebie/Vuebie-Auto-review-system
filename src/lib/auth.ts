@@ -1,4 +1,4 @@
-import { supabase } from "./supabase-with-fallback";
+import { supabase, isSupabaseConfigured } from "./supabase-with-fallback";
 import { toast } from "sonner";
 import { PostgrestError } from "@supabase/supabase-js";
 
@@ -252,6 +252,44 @@ export async function updateProfile(
 export async function fetchUserProfile(
   userId: string
 ): Promise<UserProfile> {
+  // In mock mode, create user profile from mock data
+  if (!isSupabaseConfigured()) {
+    console.log('🔧 [AUTH] Mock mode: Creating user profile for:', userId);
+    
+    // Get current session to extract user info
+    const { data: sessionData } = await supabase.auth.getSession();
+    const sessionUser = sessionData?.session?.user;
+    
+    if (sessionUser && sessionUser.user_metadata) {
+      const role = sessionUser.user_metadata.role || 'customer';
+      const fullName = sessionUser.user_metadata.full_name || 'Mock User';
+      const [firstName, ...lastNameParts] = fullName.split(' ');
+      
+      return {
+        id: userId,
+        firstName: firstName || 'Mock',
+        lastName: lastNameParts.join(' ') || 'User',
+        email: sessionUser.email || '',
+        avatar_url: null,
+        role: role,
+        business_id: `mock-business-${userId}`,
+        business_name: `${fullName}'s Business`,
+      };
+    }
+    
+    // Fallback mock profile
+    return {
+      id: userId,
+      firstName: 'Mock',
+      lastName: 'User',
+      email: 'mock@example.com',
+      avatar_url: null,
+      role: 'customer',
+      business_id: `mock-business-${userId}`,
+      business_name: 'Mock Business',
+    };
+  }
+  
   // First try to get merchant profile
   const { data: merchantProfile, error: merchantError } = await supabase
     .from("app_92a6ca4590_merchant_profiles")

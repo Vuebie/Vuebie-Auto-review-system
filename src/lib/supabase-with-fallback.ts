@@ -17,8 +17,30 @@ let supabaseClient: any;
 
 if (useMockAuth) {
   // Create mock client that mimics Supabase API
+  console.log('🔧 [SUPABASE FALLBACK] Creating mock client with mockAuthService');
   supabaseClient = {
-    auth: mockAuthService,
+    auth: {
+      signInWithPassword: async (credentials: any) => {
+        console.log('🔐 [SUPABASE FALLBACK] Mock auth.signInWithPassword called with:', credentials.email);
+        return await mockAuthService.signInWithPassword(credentials.email, credentials.password);
+      },
+      signOut: async () => {
+        console.log('🔐 [SUPABASE FALLBACK] Mock auth.signOut called');
+        return await mockAuthService.signOut();
+      },
+      getSession: async () => {
+        console.log('🔐 [SUPABASE FALLBACK] Mock auth.getSession called');
+        return await mockAuthService.getSession();
+      },
+      getUser: async () => {
+        console.log('🔐 [SUPABASE FALLBACK] Mock auth.getUser called');
+        return await mockAuthService.getUser();
+      },
+      onAuthStateChange: (callback: any) => {
+        console.log('🔐 [SUPABASE FALLBACK] Mock auth.onAuthStateChange called');
+        return mockAuthService.onAuthStateChange(callback);
+      }
+    },
     from: (table: string) => mockAuthService.from(table),
     supabaseUrl: 'mock://localhost',
     supabaseKey: 'mock-key'

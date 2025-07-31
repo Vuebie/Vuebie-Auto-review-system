@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Direct Auth Test</title>
+</head>
+<body>
+    <h1>Direct Authentication Test</h1>
+    <div id="result"></div>
+    
+    <script type="module">
+        // Test the authentication directly
+        import { supabase } from './src/lib/supabase-with-fallback.ts';
+        
+        const testAuth = async () => {
+            console.log('🧪 [TEST] Starting direct authentication test...');
+            
+            try {
+                const result = await supabase.auth.signInWithPassword({
+                    email: 'admin@vuebie.com',
+                    password: '123456'
+                });
+                
+                console.log('🧪 [TEST] Authentication result:', result);
+                
+                if (result.error) {
+                    document.getElementById('result').innerHTML = `
+                        <h2 style="color: red;">❌ Authentication Failed</h2>
+                        <p>Error: ${result.error.message}</p>
+                    `;
+                } else {
+                    document.getElementById('result').innerHTML = `
+                        <h2 style="color: green;">✅ Authentication Successful</h2>
+                        <p>User: ${result.data.user?.email}</p>
+                        <p>Role: ${result.data.user?.user_metadata?.role}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('🧪 [TEST] Error during test:', error);
+                document.getElementById('result').innerHTML = `
+                    <h2 style="color: red;">❌ Test Failed</h2>
+                    <p>Error: ${error.message}</p>
+                `;
+            }
+        };
+        
+        // Run test when page loads
+        testAuth();
+    </script>
+</body>
+</html>

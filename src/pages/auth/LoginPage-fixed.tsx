@@ -60,7 +60,7 @@ export default function LoginPage() {
 
       if (authError) {
         // Log failed login attempt
-        await securityMonitor.logEvent('login_failed', {
+        await securityMonitor.log('login_failed', {
           email: data.email,
           reason: authError.message,
         });
@@ -82,7 +82,7 @@ export default function LoginPage() {
         setShowMFAVerification(true);
         
         // Log MFA challenge sent
-        await securityMonitor.logEvent('mfa_challenge', {
+        await securityMonitor.log('mfa_challenge', {
           user_id: authData.user.id,
           email: data.email,
         });

@@ -6,10 +6,18 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { setupGlobalErrorHandling } from '@/lib/error-monitoring';
+import { shouldUseMockAuth } from '@/lib/mock-auth';
+import { supabase } from '@/lib/supabase-with-fallback';
 import './i18n'; // Initialize i18n
 
 // Setup global error handling
 setupGlobalErrorHandling();
+
+// Debug authentication setup
+console.log('🚀 [APP] Application starting...');
+console.log('🔍 [APP] Mock auth enabled:', shouldUseMockAuth());
+console.log('🔍 [APP] Supabase client type:', typeof supabase);
+console.log('🔍 [APP] Supabase auth methods:', Object.keys(supabase.auth || {}));
 
 // Layouts
 import MainLayout from './components/layout/MainLayout';

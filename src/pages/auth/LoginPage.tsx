@@ -50,15 +50,20 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormValues) => {
     console.log('🔑 [DEBUG] Login form submitted with email:', data.email);
+    console.log('🔑 [DEBUG] Login form submitted with password length:', data.password.length);
+    console.log('🔑 [DEBUG] Supabase client:', supabase);
+    console.log('🔑 [DEBUG] Supabase auth object:', supabase.auth);
     setIsLoading(true);
     setError('');
 
     try {
       console.log('🔐 [DEBUG] Calling supabase.auth.signInWithPassword...');
+      console.log('🔐 [DEBUG] About to call signInWithPassword with:', { email: data.email, passwordLength: data.password.length });
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
+      console.log('🔐 [DEBUG] signInWithPassword completed');
       
       console.log('🔍 [DEBUG] Authentication response:', { 
         hasUser: !!authData?.user, 
