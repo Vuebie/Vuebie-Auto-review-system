@@ -574,11 +574,49 @@
     "confirmDelete": "您确定要删除此活动吗？",
     "deleteWarning": "此操作无法撤销。所有活动数据将被永久删除。",
     "settings": {
-      "title": "活动设置",
-      "tracking": "跟踪设置",
-      "notifications": "通知设置",
-      "goals": "活动目标",
-      "targetAudience": "目标受众"
+      "title": "设置",
+      "description": "管理您的账户设置和偏好",
+      "tabs": {
+        "general": "常规",
+        "notifications": "通知",
+        "appearance": "外观",
+        "api": "API"
+      },
+      "generalSettings": "常规设置",
+      "generalSettingsDescription": "配置您的基本账户偏好",
+      "language": "语言",
+      "languageDescription": "选择您偏好的界面语言",
+      "selectLanguage": "选择语言",
+      "timezone": "时区",
+      "timezoneDescription": "设置您的时区以获得准确的时间戳",
+      "selectTimezone": "选择时区",
+      "autoTimezone": "自动检测时区",
+      "exportData": "导出数据",
+      "exportDataDescription": "以CSV格式下载您的数据",
+      "exportCSV": "导出CSV",
+      "saving": "保存中...",
+      "saveChanges": "保存更改",
+      "saveSuccess": "设置保存成功",
+      "notificationSettings": "通知设置",
+      "notificationSettingsDescription": "配置您接收通知的方式",
+      "emailNotifications": "邮件通知",
+      "enableEmailNotifications": "启用邮件通知",
+      "emailNotificationsDescription": "通过邮件接收通知",
+      "newReviewNotifications": "新评论通知",
+      "newReviewNotificationsDescription": "收到新评论时获得通知",
+      "marketingEmails": "营销邮件",
+      "marketingEmailsDescription": "接收有关新功能和促销的更新",
+      "appearanceSettings": "外观设置",
+      "appearanceSettingsDescription": "自定义您的仪表板外观和感觉",
+      "primaryColor": "主色调",
+      "primaryColorDescription": "选择您品牌的主色调",
+      "apiSettings": "API设置",
+      "apiSettingsDescription": "管理您的API访问和密钥",
+      "apiKey": "API密钥",
+      "apiKeyDescription": "使用此密钥以编程方式访问API",
+      "generateNewKey": "生成新密钥",
+      "apiKeyGenerated": "新API密钥生成成功",
+      "copyApiKey": "复制API密钥"
     }
   },
   "subscription": {
@@ -649,7 +687,44 @@
       "free": "基础模板",
       "starter": "标准模板",
       "pro": "高级模板"
+    }
+  },
+  "templates": {
+    "title": "模板",
+    "description": "自定义您的评论模板和外观",
+    "tabs": {
+      "templates": "模板",
+      "customize": "自定义",
+      "preview": "预览"
     },
+    "defaultTemplate": "默认模板",
+    "defaultTemplateDescription": "简洁专业的设计",
+    "minimalTemplate": "简约模板",
+    "minimalTemplateDescription": "简单专注的布局",
+    "modernTemplate": "现代模板",
+    "modernTemplateDescription": "带动画的现代设计",
+    "selected": "已选择",
+    "selectTemplate": "选择模板",
+    "saveSuccess": "模板设置保存成功",
+    "customization": {
+      "headerTitle": "标题",
+      "headerSubtitle": "副标题",
+      "ratingLabel": "评分标签",
+      "commentLabel": "评论标签",
+      "commentPlaceholder": "评论占位符",
+      "submitButtonText": "提交按钮文本",
+      "thankYouTitle": "感谢页面标题",
+      "thankYouMessage": "感谢页面消息",
+      "primaryColor": "主色调",
+      "backgroundColor": "背景颜色",
+      "enableLogo": "启用徽标",
+      "enableRating": "启用评分",
+      "enableComments": "启用评论",
+      "showThankYouPage": "显示感谢页面"
+    }
+  },
+  "pricing": {
+    "qrCodes": {
     "analytics": {
       "free": "基础分析",
       "starter": "标准分析",
@@ -658,12 +733,6 @@
     "incentives": {
       "starter": "基础奖励",
       "pro": "高级奖励"
-    },
-    "customDomain": {
-      "pro": "自定义域名支持"
-    },
-    "api": {
-      "pro": "API访问"
     }
   },
   "qrCode": {
@@ -718,6 +787,12 @@
     "printOptions": "打印选项",
     "printStandard": "标准尺寸",
     "printLarge": "大尺寸",
-    "printWithInstructions": "打印带说明"
+    "printWithInstructions": "打印说明"
+  }
+  },
+  "notFound": {
+    "title": "页面未找到",
+    "message": "您要查找的页面不存在或已被移动。",
+    "backButton": "返回首页"
   }
 }

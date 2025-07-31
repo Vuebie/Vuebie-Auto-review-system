@@ -574,11 +574,49 @@
     "confirmDelete": "Bạn có chắc chắn muốn xóa chiến dịch này?",
     "deleteWarning": "Hành động này không thể hoàn tác. Tất cả dữ liệu chiến dịch sẽ bị xóa vĩnh viễn.",
     "settings": {
-      "title": "Cài đặt chiến dịch",
-      "tracking": "Cài đặt theo dõi",
-      "notifications": "Cài đặt thông báo",
-      "goals": "Mục tiêu chiến dịch",
-      "targetAudience": "Đối tượng mục tiêu"
+      "title": "Cài đặt",
+      "description": "Quản lý cài đặt tài khoản và tùy chọn của bạn",
+      "tabs": {
+        "general": "Chung",
+        "notifications": "Thông báo",
+        "appearance": "Giao diện",
+        "api": "API"
+      },
+      "generalSettings": "Cài đặt chung",
+      "generalSettingsDescription": "Cấu hình tùy chọn tài khoản cơ bản của bạn",
+      "language": "Ngôn ngữ",
+      "languageDescription": "Chọn ngôn ngữ ưa thích cho giao diện",
+      "selectLanguage": "Chọn ngôn ngữ",
+      "timezone": "Múi giờ",
+      "timezoneDescription": "Đặt múi giờ của bạn để có dấu thời gian chính xác",
+      "selectTimezone": "Chọn múi giờ",
+      "autoTimezone": "Tự động phát hiện múi giờ",
+      "exportData": "Xuất dữ liệu",
+      "exportDataDescription": "Tải xuống dữ liệu của bạn ở định dạng CSV",
+      "exportCSV": "Xuất CSV",
+      "saving": "Đang lưu...",
+      "saveChanges": "Lưu thay đổi",
+      "saveSuccess": "Cài đặt đã được lưu thành công",
+      "notificationSettings": "Cài đặt thông báo",
+      "notificationSettingsDescription": "Cấu hình cách bạn nhận thông báo",
+      "emailNotifications": "Thông báo email",
+      "enableEmailNotifications": "Bật thông báo email",
+      "emailNotificationsDescription": "Nhận thông báo qua email",
+      "newReviewNotifications": "Thông báo đánh giá mới",
+      "newReviewNotificationsDescription": "Được thông báo khi bạn nhận được đánh giá mới",
+      "marketingEmails": "Email tiếp thị",
+      "marketingEmailsDescription": "Nhận cập nhật về tính năng mới và khuyến mãi",
+      "appearanceSettings": "Cài đặt giao diện",
+      "appearanceSettingsDescription": "Tùy chỉnh giao diện của bảng điều khiển",
+      "primaryColor": "Màu chính",
+      "primaryColorDescription": "Chọn màu chính của thương hiệu bạn",
+      "apiSettings": "Cài đặt API",
+      "apiSettingsDescription": "Quản lý quyền truy cập API và khóa của bạn",
+      "apiKey": "Khóa API",
+      "apiKeyDescription": "Sử dụng khóa này để truy cập API theo chương trình",
+      "generateNewKey": "Tạo khóa mới",
+      "apiKeyGenerated": "Khóa API mới đã được tạo thành công",
+      "copyApiKey": "Sao chép khóa API"
     }
   },
   "subscription": {
@@ -649,7 +687,44 @@
       "free": "Mẫu cơ bản",
       "starter": "Mẫu tiêu chuẩn",
       "pro": "Mẫu cao cấp"
+    }
+  },
+  "templates": {
+    "title": "Mẫu",
+    "description": "Tùy chỉnh mẫu đánh giá và giao diện của bạn",
+    "tabs": {
+      "templates": "Mẫu",
+      "customize": "Tùy chỉnh",
+      "preview": "Xem trước"
     },
+    "defaultTemplate": "Mẫu mặc định",
+    "defaultTemplateDescription": "Thiết kế sạch sẽ và chuyên nghiệp",
+    "minimalTemplate": "Mẫu tối giản",
+    "minimalTemplateDescription": "Bố cục đơn giản và tập trung",
+    "modernTemplate": "Mẫu hiện đại",
+    "modernTemplateDescription": "Thiết kế đương đại với hoạt ảnh",
+    "selected": "Đã chọn",
+    "selectTemplate": "Chọn mẫu",
+    "saveSuccess": "Cài đặt mẫu đã được lưu thành công",
+    "customization": {
+      "headerTitle": "Tiêu đề header",
+      "headerSubtitle": "Phụ đề header",
+      "ratingLabel": "Nhãn đánh giá",
+      "commentLabel": "Nhãn bình luận",
+      "commentPlaceholder": "Placeholder bình luận",
+      "submitButtonText": "Văn bản nút gửi",
+      "thankYouTitle": "Tiêu đề cảm ơn",
+      "thankYouMessage": "Tin nhắn cảm ơn",
+      "primaryColor": "Màu chính",
+      "backgroundColor": "Màu nền",
+      "enableLogo": "Bật logo",
+      "enableRating": "Bật đánh giá",
+      "enableComments": "Bật bình luận",
+      "showThankYouPage": "Hiển thị trang cảm ơn"
+    }
+  },
+  "pricing": {
+    "qrCodes": {
     "analytics": {
       "free": "Phân tích cơ bản",
       "starter": "Phân tích tiêu chuẩn",
@@ -658,12 +733,6 @@
     "incentives": {
       "starter": "Khuyến mãi cơ bản",
       "pro": "Khuyến mãi nâng cao"
-    },
-    "customDomain": {
-      "pro": "Hỗ trợ tên miền tùy chỉnh"
-    },
-    "api": {
-      "pro": "Truy cập API"
     }
   },
   "qrCode": {
@@ -718,6 +787,12 @@
     "printOptions": "Tùy chọn in",
     "printStandard": "Kích thước tiêu chuẩn",
     "printLarge": "Kích thước lớn",
-    "printWithInstructions": "In kèm hướng dẫn"
+    "printWithInstructions": "In với hướng dẫn"
+  }
+  },
+  "notFound": {
+    "title": "Không tìm thấy trang",
+    "message": "Trang bạn đang tìm kiếm không tồn tại hoặc đã được di chuyển.",
+    "backButton": "Về trang chủ"
   }
 }

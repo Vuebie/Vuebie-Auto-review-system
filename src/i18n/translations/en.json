@@ -571,11 +571,49 @@
     "confirmDelete": "Are you sure you want to delete this campaign?",
     "deleteWarning": "This action cannot be undone. All campaign data will be permanently removed.",
     "settings": {
-      "title": "Campaign Settings",
-      "tracking": "Tracking Settings",
-      "notifications": "Notification Settings",
-      "goals": "Campaign Goals",
-      "targetAudience": "Target Audience"
+      "title": "Settings",
+      "description": "Manage your account settings and preferences",
+      "tabs": {
+        "general": "General",
+        "notifications": "Notifications",
+        "appearance": "Appearance",
+        "api": "API"
+      },
+      "generalSettings": "General Settings",
+      "generalSettingsDescription": "Configure your basic account preferences",
+      "language": "Language",
+      "languageDescription": "Choose your preferred language for the interface",
+      "selectLanguage": "Select language",
+      "timezone": "Timezone",
+      "timezoneDescription": "Set your timezone for accurate timestamps",
+      "selectTimezone": "Select timezone",
+      "autoTimezone": "Auto-detect timezone",
+      "exportData": "Export Data",
+      "exportDataDescription": "Download your data in CSV format",
+      "exportCSV": "Export CSV",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes",
+      "saveSuccess": "Settings saved successfully",
+      "notificationSettings": "Notification Settings",
+      "notificationSettingsDescription": "Configure how you receive notifications",
+      "emailNotifications": "Email Notifications",
+      "enableEmailNotifications": "Enable email notifications",
+      "emailNotificationsDescription": "Receive notifications via email",
+      "newReviewNotifications": "New Review Notifications",
+      "newReviewNotificationsDescription": "Get notified when you receive new reviews",
+      "marketingEmails": "Marketing Emails",
+      "marketingEmailsDescription": "Receive updates about new features and promotions",
+      "appearanceSettings": "Appearance Settings",
+      "appearanceSettingsDescription": "Customize the look and feel of your dashboard",
+      "primaryColor": "Primary Color",
+      "primaryColorDescription": "Choose your brand's primary color",
+      "apiSettings": "API Settings",
+      "apiSettingsDescription": "Manage your API access and keys",
+      "apiKey": "API Key",
+      "apiKeyDescription": "Use this key to access the API programmatically",
+      "generateNewKey": "Generate New Key",
+      "apiKeyGenerated": "New API key generated successfully",
+      "copyApiKey": "Copy API Key"
     }
   },
   "subscription": {
@@ -703,21 +741,40 @@
       "free": "Basic templates",
       "starter": "Standard templates",
       "pro": "Premium templates"
+    }
+  },
+  "templates": {
+    "title": "Templates",
+    "description": "Customize your review templates and appearance",
+    "tabs": {
+      "templates": "Templates",
+      "customize": "Customize",
+      "preview": "Preview"
     },
-    "analytics": {
-      "free": "Basic analytics",
-      "starter": "Standard analytics",
-      "pro": "Advanced analytics"
-    },
-    "incentives": {
-      "starter": "Basic incentives",
-      "pro": "Advanced incentives"
-    },
-    "customDomain": {
-      "pro": "Custom domain support"
-    },
-    "api": {
-      "pro": "API access"
+    "defaultTemplate": "Default Template",
+    "defaultTemplateDescription": "Clean and professional design",
+    "minimalTemplate": "Minimal Template",
+    "minimalTemplateDescription": "Simple and focused layout",
+    "modernTemplate": "Modern Template",
+    "modernTemplateDescription": "Contemporary design with animations",
+    "selected": "Selected",
+    "selectTemplate": "Select Template",
+    "saveSuccess": "Template settings saved successfully",
+    "customization": {
+      "headerTitle": "Header Title",
+      "headerSubtitle": "Header Subtitle",
+      "ratingLabel": "Rating Label",
+      "commentLabel": "Comment Label",
+      "commentPlaceholder": "Comment Placeholder",
+      "submitButtonText": "Submit Button Text",
+      "thankYouTitle": "Thank You Title",
+      "thankYouMessage": "Thank You Message",
+      "primaryColor": "Primary Color",
+      "backgroundColor": "Background Color",
+      "enableLogo": "Enable Logo",
+      "enableRating": "Enable Rating",
+      "enableComments": "Enable Comments",
+      "showThankYouPage": "Show Thank You Page"
     }
   },
   "qrCode": {
@@ -773,5 +830,10 @@
     "printStandard": "Standard Size",
     "printLarge": "Large Size",
     "printWithInstructions": "Print with Instructions"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "message": "The page you're looking for doesn't exist or has been moved.",
+    "backButton": "Go Back Home"
   }
 }

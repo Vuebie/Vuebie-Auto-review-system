@@ -29,6 +29,12 @@ export interface EventCriteria {
 }
 
 class SecurityMonitor {
+  log(arg0: string, arg1: { email: string; reason: any; }) {
+    throw new Error('Method not implemented.');
+  }
+  logEvent(arg0: string, arg1: { user_id: any; email: string; }) {
+    throw new Error('Method not implemented.');
+  }
   private static instance: SecurityMonitor;
   private securityEvents: SecurityEvent[] = [];
   private highSeverityEvents: SecurityEvent[] = [];
