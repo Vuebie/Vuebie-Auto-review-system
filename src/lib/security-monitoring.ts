@@ -1,4 +1,4 @@
-import { supabase, TABLES } from './supabase-unified';
+import { supabase, TABLES, isSupabaseConfigured } from './supabase-with-fallback';
 
 export type SecurityEventSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
@@ -269,6 +269,17 @@ class SecurityMonitor {
    * Persist a security event to the database
    */
   private async persistSecurityEvent(event: SecurityEvent): Promise<void> {
+    // Skip database operations in mock mode
+    if (!isSupabaseConfigured()) {
+      console.log('Security event logged (mock mode):', {
+        eventType: event.eventType,
+        severity: event.severity,
+        userId: event.userId,
+        timestamp: event.timestamp
+      });
+      return;
+    }
+
     try {
       await supabase
         .from(TABLES.SECURITY_EVENTS)

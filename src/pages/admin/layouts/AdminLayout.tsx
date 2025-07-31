@@ -14,6 +14,7 @@ import {
   User,
   ClipboardList,
   Activity,
+  Shield,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -37,15 +38,21 @@ export default function AdminLayout({
   const navigation = [
     {
       name: t('admin.dashboard'),
-      href: '/admin',
+      href: '/admin/dashboard',
       icon: Home,
-      current: location.pathname === '/admin',
+      current: location.pathname === '/admin/dashboard',
     },
     {
       name: t('admin.merchants'),
       href: '/admin/merchants',
       icon: Building2,
       current: location.pathname.startsWith('/admin/merchants'),
+    },
+    {
+      name: t('admin.security'),
+      href: '/admin/security',
+      icon: Shield,
+      current: location.pathname.startsWith('/admin/security'),
     },
     {
       name: t('admin.users'),

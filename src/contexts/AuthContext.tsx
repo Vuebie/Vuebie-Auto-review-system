@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase, TABLES, FUNCTIONS, MerchantProfile } from '@/lib/supabase-client';
+import { supabase, TABLES, FUNCTIONS, isSupabaseConfigured } from '@/lib/supabase-with-fallback';
+import { MerchantProfile } from '@/lib/supabase-client';
 import { User } from '@supabase/supabase-js';
 import { getCurrentUser } from '@/lib/auth';
 
@@ -117,6 +118,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Check if user has a specific permission
   const checkPermission = async (resource: string, action: string): Promise<boolean> => {
     if (!user) return false;
+    
+    // In mock mode, grant permissions based on user role
+    if (!isSupabaseConfigured()) {
+      const userRole = user.user_metadata?.role || 'customer';
+      if (userRole === 'super_admin') return true;
+      if (userRole === 'admin' && ['users', 'settings', 'reports'].includes(resource)) return true;
+      if (userRole === 'merchant' && ['campaigns', 'reviews', 'outlets'].includes(resource)) return true;
+      return false;
+    }
     
     try {
       const response = await fetch(FUNCTIONS.CHECK_PERMISSION, {

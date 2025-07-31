@@ -23,6 +23,8 @@ const AccountSettings = lazy(() => import('@/pages/settings/AccountSettings'));
 
 // Admin Pages
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
+const MerchantManagement = lazy(() => import('@/pages/admin/MerchantManagement'));
+const SecurityMonitoring = lazy(() => import('@/pages/admin/SecurityMonitoring'));
 const UserManagement = lazy(() => import('@/pages/admin/UserManagement'));
 const SystemSettings = lazy(() => import('@/pages/admin/SystemSettings'));
 
@@ -124,19 +126,31 @@ export default function AppRoutes() {
         
         {/* Admin Routes */}
         <Route path="/admin/dashboard" element={
-          <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
+          <ProtectedRoute allowedRoles={['super_admin']}>
             <AdminDashboard />
           </ProtectedRoute>
         } />
         
+        <Route path="/admin/merchants" element={
+          <ProtectedRoute allowedRoles={['super_admin']}>
+            <MerchantManagement />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admin/security" element={
+          <ProtectedRoute allowedRoles={['super_admin']}>
+            <SecurityMonitoring />
+          </ProtectedRoute>
+        } />
+        
         <Route path="/admin/users" element={
-          <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
+          <ProtectedRoute allowedRoles={['super_admin']}>
             <UserManagement />
           </ProtectedRoute>
         } />
         
         <Route path="/admin/settings" element={
-          <ProtectedRoute allowedRoles={['admin', 'super_admin']}>
+          <ProtectedRoute allowedRoles={['super_admin']}>
             <SystemSettings />
           </ProtectedRoute>
         } />

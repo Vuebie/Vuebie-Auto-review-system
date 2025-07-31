@@ -1,4 +1,4 @@
-import { supabase, TABLES } from './supabase-unified';
+import { supabase, TABLES, isSupabaseConfigured } from './supabase-with-fallback';
 import { securityMonitor } from './security-monitoring';
 import { nanoid } from 'nanoid';
 import * as OTPAuth from 'otpauth';
@@ -235,6 +235,12 @@ export const mfaHelper = {
    * @returns Boolean indicating if MFA is enabled
    */
   async isMFAEnabled(userId: string) {
+    // In mock mode, MFA is disabled for easier testing
+    if (!isSupabaseConfigured()) {
+      console.log('🔧 [MFA] Mock mode: MFA disabled for user:', userId);
+      return false;
+    }
+
     try {
       const { data, error } = await supabase
         .from(TABLES.MERCHANT_PROFILES)
@@ -259,6 +265,12 @@ export const mfaHelper = {
    * @returns Boolean indicating if MFA is required
    */
   async isMFARequired(userId: string) {
+    // In mock mode, MFA is not required for easier testing
+    if (!isSupabaseConfigured()) {
+      console.log('🔧 [MFA] Mock mode: MFA not required for user:', userId);
+      return false;
+    }
+
     try {
       const { data, error } = await supabase
         .from(TABLES.MERCHANT_PROFILES)

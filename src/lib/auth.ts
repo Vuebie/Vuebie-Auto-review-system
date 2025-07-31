@@ -1,4 +1,4 @@
-import { supabase } from "./supabase-client";
+import { supabase } from "./supabase-with-fallback";
 import { toast } from "sonner";
 import { PostgrestError } from "@supabase/supabase-js";
 

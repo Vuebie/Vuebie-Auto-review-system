@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase-unified';
+import { supabase } from '@/lib/supabase-with-fallback';
 import { securityMonitor } from '@/lib/security-monitoring';
 import { mfaHelper } from '@/lib/mfa-helper';
 
@@ -49,18 +49,26 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormValues) => {
+    console.log('🔑 [DEBUG] Login form submitted with email:', data.email);
     setIsLoading(true);
     setError('');
 
     try {
+      console.log('🔐 [DEBUG] Calling supabase.auth.signInWithPassword...');
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
+      
+      console.log('🔍 [DEBUG] Authentication response:', { 
+        hasUser: !!authData?.user, 
+        hasSession: !!authData?.session, 
+        error: authError?.message 
+      });
 
       if (authError) {
         // Log failed login attempt
-        await securityMonitor.logEvent('login_failed', {
+        await securityMonitor.logSecurityEvent('login_failed', {
           email: data.email,
           reason: authError.message,
         });
@@ -82,13 +90,13 @@ export default function LoginPage() {
         setShowMFAVerification(true);
         
         // Log MFA challenge sent
-        await securityMonitor.logEvent('mfa_challenge', {
+        await securityMonitor.logSecurityEvent('mfa_challenge', {
           user_id: authData.user.id,
           email: data.email,
         });
       } else {
         // Log successful login
-        await securityMonitor.logEvent('login_success', {
+        await securityMonitor.logSecurityEvent('login_success', {
           user_id: authData.user.id,
           email: data.email,
         });
@@ -115,7 +123,7 @@ export default function LoginPage() {
 
   const handleMFAVerified = async () => {
     // Log successful MFA verification
-    await securityMonitor.logEvent('mfa_success', {
+    await securityMonitor.logSecurityEvent('mfa_success', {
       user_id: pendingUserId,
     });
     
