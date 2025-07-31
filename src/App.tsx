@@ -32,6 +32,7 @@ const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'));
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
 const OutletsPage = lazy(() => import('./pages/dashboard/OutletsPage'));
 const OutletDetailPage = lazy(() => import('./pages/dashboard/OutletDetailPage'));
+const CreateOutletPage = lazy(() => import('./pages/dashboard/CreateOutletPage'));
 const QRCodesPage = lazy(() => import('./pages/dashboard/QRCodesPage'));
 const CreateQRCodePage = lazy(() => import('./pages/dashboard/CreateQRCodePage'));
 const IncentivesPage = lazy(() => import('./pages/dashboard/IncentivesPage'));
@@ -101,6 +102,11 @@ export default function App() {
                 <Route path="/outlets/:id" element={
                   <ProtectedRoute requiredRoles={['merchant']}>
                     <OutletDetailPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/outlets/new" element={
+                  <ProtectedRoute requiredRoles={['merchant']}>
+                    <CreateOutletPage />
                   </ProtectedRoute>
                 } />
                 <Route path="/qr-codes" element={

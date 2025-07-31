@@ -55,7 +55,7 @@ const RoleManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedRole, setSelectedRole] = useState<string>('');
@@ -241,7 +241,7 @@ const RoleManagement: React.FC = () => {
   // Filter users based on search term and role filter
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === '' || 
+    const matchesRole = roleFilter === 'all' || 
                        (roleFilter === 'unassigned' && !user.role) ||
                        (user.role === roleFilter);
     return matchesSearch && matchesRole;
@@ -320,7 +320,7 @@ const RoleManagement: React.FC = () => {
                 <SelectValue placeholder={t('admin.filterByStatus')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{t('admin.allUsers')}</SelectItem>
+                <SelectItem value="all">{t('admin.allUsers')}</SelectItem>
                 <SelectItem value="unassigned">{t('admin.unassigned')}</SelectItem>
                 {roles.map(role => (
                   <SelectItem key={role.value} value={role.value}>{role.label}</SelectItem>

@@ -60,8 +60,8 @@ const AuditLogs: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [actionFilter, setActionFilter] = useState('');
-  const [resourceFilter, setResourceFilter] = useState('');
+  const [actionFilter, setActionFilter] = useState('all');
+  const [resourceFilter, setResourceFilter] = useState('all');
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   
   const [page, setPage] = useState(1);
@@ -87,11 +87,11 @@ const AuditLogs: React.FC = () => {
         query = query.or(`user_id.ilike.%${searchTerm}%,action.ilike.%${searchTerm}%,resource_type.ilike.%${searchTerm}%`);
       }
       
-      if (actionFilter) {
+      if (actionFilter && actionFilter !== 'all') {
         query = query.eq('action', actionFilter);
       }
       
-      if (resourceFilter) {
+      if (resourceFilter && resourceFilter !== 'all') {
         query = query.eq('resource_type', resourceFilter);
       }
       
@@ -235,7 +235,7 @@ const AuditLogs: React.FC = () => {
                   <SelectValue placeholder={t('admin.filterByAction')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t('admin.allActions')}</SelectItem>
+                  <SelectItem value="all">{t('admin.allActions')}</SelectItem>
                   {uniqueActions.map((action) => (
                     <SelectItem key={action} value={action}>{action}</SelectItem>
                   ))}
@@ -246,7 +246,7 @@ const AuditLogs: React.FC = () => {
                   <SelectValue placeholder={t('admin.filterByResource')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t('admin.allResources')}</SelectItem>
+                  <SelectItem value="all">{t('admin.allResources')}</SelectItem>
                   {uniqueResources.map((resource) => (
                     <SelectItem key={resource} value={resource}>{resource}</SelectItem>
                   ))}

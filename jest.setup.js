@@ -1,6 +1,19 @@
 // Import jest-dom for additional matchers
 import '@testing-library/jest-dom';
 
+// Mock import.meta for Jest
+Object.defineProperty(globalThis, 'import', {
+  value: {
+    meta: {
+      env: {
+        VITE_SUPABASE_URL: 'http://localhost:54321',
+        VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+        VITE_SUPABASE_SERVICE_ROLE_KEY: 'test-service-role-key'
+      }
+    }
+  }
+});
+
 // Mock localStorage
 global.localStorage = {
   getItem: jest.fn(),

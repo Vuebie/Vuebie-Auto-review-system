@@ -190,7 +190,7 @@ export default function ReviewPage() {
         outletId: qrCodeInfo.outletId,
         rating: formData.rating,
         comment: formData.comment,
-        userId: user?.user?.id,
+        userId: user?.id,
         deviceFingerprint: deviceFingerprint,
       });
       

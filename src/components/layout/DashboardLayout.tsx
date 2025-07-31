@@ -41,37 +41,37 @@ export default function DashboardLayout({
   // Navigation items for the sidebar
   const navigation = [
     {
-      name: t('dashboard.overview'),
+      name: t('merchant.dashboard'),
       href: '/dashboard',
       icon: Home,
       current: location.pathname === '/dashboard',
     },
     {
-      name: t('dashboard.outlets'),
+      name: t('merchant.outlets'),
       href: '/outlets',
       icon: Building2,
       current: location.pathname.startsWith('/outlets'),
     },
     {
-      name: t('dashboard.qrCodes'),
+      name: t('merchant.qrCodes'),
       href: '/qr-codes',
       icon: QrCode,
       current: location.pathname.startsWith('/qr-codes'),
     },
     {
-      name: t('dashboard.incentives'),
+      name: t('merchant.incentives'),
       href: '/incentives',
       icon: Gift,
       current: location.pathname.startsWith('/incentives'),
     },
     {
-      name: t('dashboard.templates'),
+      name: t('templates.title'),
       href: '/templates',
       icon: FileText,
       current: location.pathname.startsWith('/templates'),
     },
     {
-      name: t('dashboard.analytics'),
+      name: t('merchant.analytics'),
       href: '/analytics',
       icon: BarChart3,
       current: location.pathname.startsWith('/analytics'),
@@ -81,19 +81,19 @@ export default function DashboardLayout({
   // Settings and profile navigation
   const secondaryNavigation = [
     {
-      name: t('dashboard.profile'),
+      name: t('merchant.profile'),
       href: '/profile',
       icon: User,
       current: location.pathname === '/profile',
     },
     {
-      name: t('dashboard.settings'),
+      name: t('merchant.settings'),
       href: '/settings',
       icon: Settings,
       current: location.pathname === '/settings',
     },
     {
-      name: t('dashboard.subscription'),
+      name: t('subscription.title'),
       href: '/subscription',
       icon: CreditCard,
       current: location.pathname === '/subscription',

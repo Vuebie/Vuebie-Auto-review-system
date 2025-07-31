@@ -88,7 +88,7 @@ const GlobalSettings: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentSetting, setCurrentSetting] = useState<Setting | null>(null);
@@ -270,12 +270,12 @@ const GlobalSettings: React.FC = () => {
     }
   };
 
-  // Filter settings based on search term
+  // Filter settings based on search term and category
   const filteredSettings = settings.filter(setting => {
-    return (
-      setting.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      setting.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const matchesSearch = setting.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      setting.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = categoryFilter === 'all' || setting.category === categoryFilter;
+    return matchesSearch && matchesCategory;
   });
 
   // Handle edit setting
@@ -345,7 +345,7 @@ const GlobalSettings: React.FC = () => {
                   <SelectValue placeholder={t('admin.category')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t('admin.allResources')}</SelectItem>
+                  <SelectItem value="all">{t('admin.allResources')}</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.value} value={category.value}>{category.label}</SelectItem>
                   ))}

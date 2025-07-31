@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase, TABLES, FUNCTIONS, isSupabaseConfigured } from '@/lib/supabase-with-fallback';
 import { MerchantProfile } from '@/lib/supabase-client';
 import { User } from '@supabase/supabase-js';
@@ -9,7 +9,11 @@ interface AuthContextType {
   loading: boolean;
   profile: MerchantProfile | null;
   roles: string[];
+  error: string | null;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
   checkPermission: (resource: string, action: string) => Promise<boolean>;
+  hasPermission: (resource: string, action: string) => boolean;
   refreshUser: () => Promise<void>;
   hasMerchantRole: boolean;
   hasAdminRole: boolean;
@@ -27,6 +31,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [profile, setProfile] = useState<MerchantProfile | null>(null);
   const [roles, setRoles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [hasMerchantRole, setHasMerchantRole] = useState(false);
   const [hasAdminRole, setHasAdminRole] = useState(false);
   const [hasSuperAdminRole, setHasSuperAdminRole] = useState(false);
@@ -46,7 +51,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const user = userProfile ? {
         id: userProfile.id,
         email: userProfile.email,
-        role: userProfile.role
+        role: userProfile.role,
+        user_metadata: {
+          role: userProfile.role
+        }
       } as User : null;
       
       setUser(user);
@@ -99,6 +107,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     } catch (error) {
       // Clear all user state on error
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load user';
+      setError(errorMessage);
+      console.error('Load user error:', error);
       setUser(null);
       setProfile(null);
       setRoles([]);
@@ -115,17 +126,82 @@ export function AuthProvider({ children }: AuthProviderProps) {
     await loadUser();
   };
 
-  // Check if user has a specific permission
+  // Login method
+  const login = async (email: string, password: string): Promise<void> => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) {
+        setError(error.message);
+        throw error;
+      }
+      
+      await loadUser();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Login failed';
+      setError(errorMessage);
+      console.error('Login error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Logout method
+  const logout = async (): Promise<void> => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        setError(error.message);
+        throw error;
+      }
+      
+      // Clear all state
+      setUser(null);
+      setProfile(null);
+      setRoles([]);
+      setHasMerchantRole(false);
+      setHasAdminRole(false);
+      setHasSuperAdminRole(false);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Logout failed';
+      setError(errorMessage);
+      console.error('Logout error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Check if user has a specific permission (synchronous version)
+  const hasPermission = (resource: string, action: string): boolean => {
+    if (!user) return false;
+    
+    // Simple role-based permission check
+    const userRole = user.user_metadata?.role || roles[0] || 'customer';
+    if (userRole === 'super_admin') return true;
+    if (userRole === 'admin' && ['users', 'settings', 'reports'].includes(resource)) return true;
+    if (userRole === 'merchant' && ['campaigns', 'reviews', 'outlets'].includes(resource)) return true;
+    return false;
+  };
+
+  // Check if user has a specific permission (async version)
   const checkPermission = async (resource: string, action: string): Promise<boolean> => {
     if (!user) return false;
     
     // In mock mode, grant permissions based on user role
     if (!isSupabaseConfigured()) {
-      const userRole = user.user_metadata?.role || 'customer';
-      if (userRole === 'super_admin') return true;
-      if (userRole === 'admin' && ['users', 'settings', 'reports'].includes(resource)) return true;
-      if (userRole === 'merchant' && ['campaigns', 'reviews', 'outlets'].includes(resource)) return true;
-      return false;
+      return hasPermission(resource, action);
     }
     
     try {
@@ -175,8 +251,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     profile,
     roles,
     loading,
+    error,
+    login,
+    logout,
     refreshUser,
     checkPermission,
+    hasPermission,
     hasMerchantRole,
     hasAdminRole,
     hasSuperAdminRole

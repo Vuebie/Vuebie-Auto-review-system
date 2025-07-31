@@ -60,7 +60,7 @@ export default function LoginPage() {
 
       if (authError) {
         // Log failed login attempt
-        await securityMonitor.log('login_failed', {
+        await securityMonitor.logSecurityEvent('login_failed', {
           email: data.email,
           reason: authError.message,
         });
@@ -82,14 +82,14 @@ export default function LoginPage() {
         setShowMFAVerification(true);
         
         // Log MFA challenge sent
-        await securityMonitor.log('mfa_challenge', {
-          user_id: authData.user.id,
+        await securityMonitor.logSecurityEvent('mfa_challenge', {
+          userId: authData.user.id,
           email: data.email,
         });
       } else {
         // Log successful login
-        await securityMonitor.logEvent('login_success', {
-          user_id: authData.user.id,
+        await securityMonitor.logSecurityEvent('login_success', {
+          userId: authData.user.id,
           email: data.email,
         });
         
@@ -115,8 +115,8 @@ export default function LoginPage() {
 
   const handleMFAVerified = async () => {
     // Log successful MFA verification
-    await securityMonitor.logEvent('mfa_success', {
-      user_id: pendingUserId,
+    await securityMonitor.logSecurityEvent('mfa_success', {
+      userId: pendingUserId,
     });
     
     toast.success(t('auth.loginSuccess'));

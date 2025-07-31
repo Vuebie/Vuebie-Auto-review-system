@@ -19,8 +19,8 @@ interface DashboardStats {
 
 export default function DashboardPage() {
   const { t } = useTranslation();
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
     totalOutlets: 0,
     totalQrCodes: 0,
@@ -39,7 +39,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchDashboardStats = async () => {
-      if (!user?.user?.id) return;
+      if (!user?.id) return;
       
       setIsLoading(true);
       try {
@@ -47,7 +47,7 @@ export default function DashboardPage() {
         const { data: outlets, error: outletsError } = await supabase
           .from(TABLES.OUTLETS)
           .select('id')
-          .eq('merchant_id', user.user.id);
+          .eq('merchant_id', user.id);
         
         if (outletsError) throw outletsError;
         
@@ -55,7 +55,7 @@ export default function DashboardPage() {
         const { data: qrCodes, error: qrCodesError } = await supabase
           .from(TABLES.QR_CODES)
           .select('id')
-          .eq('merchant_id', user.user.id);
+          .eq('merchant_id', user.id);
         
         if (qrCodesError) throw qrCodesError;
         
@@ -63,7 +63,7 @@ export default function DashboardPage() {
         const { data: reviewsData, error: reviewsError } = await supabase
           .from(TABLES.REVIEW_SESSIONS)
           .select('id, rating, created_at')
-          .eq('merchant_id', user.user.id);
+          .eq('merchant_id', user.id);
         
         if (reviewsError) throw reviewsError;
         
@@ -92,15 +92,15 @@ export default function DashboardPage() {
       }
     };
 
-    if (user?.user?.id) {
+    if (user?.id) {
       fetchDashboardStats();
     }
-  }, [user?.user?.id]);
+  }, [user?.id]);
 
   return (
     <DashboardLayout
       title={t('dashboard.title')}
-      description={t('dashboard.welcomeMessage', { businessName: user?.merchantProfile?.business_name || '' })}
+      description={t('dashboard.welcomeMessage', { businessName: profile?.business_name || '' })}
     >
       {/* Quick Stats */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">

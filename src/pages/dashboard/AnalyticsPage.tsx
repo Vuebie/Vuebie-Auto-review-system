@@ -55,13 +55,13 @@ export default function AnalyticsPage() {
   const [customerEngagement, setCustomerEngagement] = useState<CustomerEngagement[]>([]);
 
   useEffect(() => {
-    if (!user?.user?.id) return;
+    if (!user?.id) return;
     
     const loadAnalyticsData = async () => {
       setLoading(true);
       setError(null);
       
-      const merchantId = user.user.id;
+      const merchantId = user.id;
 
       try {
         // Fetch all data in parallel

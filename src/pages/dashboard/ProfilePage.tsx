@@ -54,7 +54,7 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function ProfilePage() {
   const { t } = useTranslation();
-  const { user, refreshUser } = useAuth();
+  const { user, profile, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -62,28 +62,28 @@ export default function ProfilePage() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      business_name: user?.merchantProfile?.business_name || '',
-      business_description: user?.merchantProfile?.business_description || '',
-      contact_name: user?.merchantProfile?.contact_name || '',
-      phone: user?.merchantProfile?.phone || '',
-      website: user?.merchantProfile?.website || '',
-      address: user?.merchantProfile?.address || '',
+      business_name: profile?.business_name || '',
+      business_description: profile?.business_description || '',
+      contact_name: profile?.contact_name || '',
+      phone: profile?.phone || '',
+      website: profile?.website || '',
+      address: profile?.address || '',
     },
   });
 
   useEffect(() => {
     // Update form values when user data is loaded
-    if (user?.merchantProfile) {
+    if (profile) {
       form.reset({
-        business_name: user.merchantProfile.business_name || '',
-        business_description: user.merchantProfile.business_description || '',
-        contact_name: user.merchantProfile.contact_name || '',
-        phone: user.merchantProfile.phone || '',
-        website: user.merchantProfile.website || '',
-        address: user.merchantProfile.address || '',
+        business_name: profile.business_name || '',
+        business_description: profile.business_description || '',
+        contact_name: profile.contact_name || '',
+        phone: profile.phone || '',
+        website: profile.website || '',
+        address: profile.address || '',
       });
     }
-  }, [user?.merchantProfile, form]);
+  }, [profile, form]);
 
   useEffect(() => {
     // Redirect if not logged in
@@ -93,13 +93,13 @@ export default function ProfilePage() {
   }, [user, navigate]);
 
   async function onSubmit(data: ProfileFormValues) {
-    if (!user?.user?.id) return;
+    if (!user?.id) return;
 
     setIsLoading(true);
     
     try {
       await updateProfile({
-        merchantId: user.user.id,
+        merchantId: user.id,
         ...data
       });
       
@@ -115,7 +115,7 @@ export default function ProfilePage() {
 
   async function handleAvatarUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
-    if (!file || !user?.user?.id) return;
+    if (!file || !user?.id) return;
 
     setIsUploading(true);
     
@@ -130,7 +130,7 @@ export default function ProfilePage() {
       }
       
       // Upload to Supabase Storage
-      const filePath = `avatars/${user.user.id}/${Date.now()}_${file.name}`;
+      const filePath = `avatars/${user.id}/${Date.now()}_${file.name}`;
       const { error: uploadError } = await supabase.storage
         .from('profiles')
         .upload(filePath, file, { upsert: true });
@@ -149,7 +149,7 @@ export default function ProfilePage() {
           logo_url: urlData.publicUrl,
           updated_at: new Date().toISOString()
         })
-        .eq('merchant_id', user.user.id);
+        .eq('merchant_id', user.id);
         
       if (updateError) throw updateError;
       
@@ -198,11 +198,11 @@ export default function ProfilePage() {
                   <div className="flex flex-col items-center gap-2">
                     <Avatar className="h-24 w-24">
                       <AvatarImage 
-                        src={user.merchantProfile?.logo_url || undefined} 
-                        alt={user.merchantProfile?.business_name || 'Avatar'} 
+                        src={profile?.logo_url || undefined} 
+                        alt={profile?.business_name || 'Avatar'} 
                       />
                       <AvatarFallback className="text-2xl">
-                        {user.merchantProfile?.business_name?.charAt(0) || <User />}
+                        {profile?.business_name?.charAt(0) || <User />}
                       </AvatarFallback>
                     </Avatar>
                     
@@ -237,16 +237,16 @@ export default function ProfilePage() {
                   
                   <div className="space-y-2 text-center sm:text-left">
                     <h3 className="font-semibold text-lg">
-                      {user.merchantProfile?.business_name || user.user.email}
+                      {profile?.business_name || user?.email}
                     </h3>
                     <div className="text-muted-foreground">
-                      <p>{user.user.email}</p>
-                      {user.merchantProfile?.phone && (
-                        <p>{user.merchantProfile.phone}</p>
+                      <p>{user?.email}</p>
+                      {profile?.phone && (
+                        <p>{profile.phone}</p>
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {t('profile.accountCreated')}: {new Date(user.user.created_at).toLocaleDateString()}
+                      {t('profile.accountCreated')}: {user?.created_at ? new Date(user.created_at).toLocaleDateString() : ''}
                     </p>
                   </div>
                 </div>
@@ -259,9 +259,9 @@ export default function ProfilePage() {
                       <p className="text-sm text-muted-foreground">{t('profile.emailDescription')}</p>
                     </div>
                     <div className="min-w-[8rem] sm:text-right">
-                      <p>{user.user.email}</p>
+                      <p>{user?.email}</p>
                       <p className="text-xs text-muted-foreground">
-                        {user.user.email_confirmed_at 
+                        {user?.email_confirmed_at 
                           ? t('profile.verified') 
                           : t('profile.notVerified')}
                       </p>

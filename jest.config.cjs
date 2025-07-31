@@ -20,5 +20,14 @@ module.exports = {
     '!src/**/*.d.ts',
     '!src/**/*.stories.{ts,tsx}',
     '!src/mocks/**'
-  ]
+  ],
+  globals: {
+    'import.meta': {
+      env: {
+        VITE_SUPABASE_URL: 'http://localhost:54321',
+        VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+        VITE_SUPABASE_SERVICE_ROLE_KEY: 'test-service-role-key'
+      }
+    }
+  }
 };

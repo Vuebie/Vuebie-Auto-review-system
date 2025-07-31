@@ -30,13 +30,13 @@ export default function CreateQRCodePage() {
   // Fetch outlets for the dropdown
   useEffect(() => {
     const fetchOutlets = async () => {
-      if (!user?.user?.id) return;
+      if (!user?.id) return;
 
       try {
         const { data, error } = await supabase
           .from(TABLES.OUTLETS)
           .select('id, name')
-          .eq('merchant_id', user.user.id)
+          .eq('merchant_id', user.id)
           .order('name');
 
         if (error) throw error;
@@ -50,7 +50,7 @@ export default function CreateQRCodePage() {
     };
 
     fetchOutlets();
-  }, [user?.user?.id, t]);
+  }, [user?.id, t]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -81,7 +81,7 @@ export default function CreateQRCodePage() {
         .insert({
           name: formData.name,
           outlet_id: formData.outlet_id || null,
-          merchant_id: user.user.id,
+          merchant_id: user.id,
           code: code,
           active: true
         });

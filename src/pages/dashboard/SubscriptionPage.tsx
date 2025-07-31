@@ -108,7 +108,7 @@ export default function SubscriptionPage() {
 
   useEffect(() => {
     const fetchSubscription = async () => {
-      if (!user?.user?.id) return;
+      if (!user?.id) return;
 
       setIsLoading(true);
       try {
@@ -128,10 +128,10 @@ export default function SubscriptionPage() {
       }
     };
 
-    if (user?.user?.id) {
+    if (user?.id) {
       fetchSubscription();
     }
-  }, [user?.user?.id, t]);
+  }, [user?.id, t]);
 
   const handleUpgrade = async (tier: SubscriptionTier) => {
     setIsUpgrading(true);

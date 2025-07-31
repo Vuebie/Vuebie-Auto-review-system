@@ -15,11 +15,9 @@ import { QrCode, MapPin, Building2, Edit } from 'lucide-react';
 interface Outlet {
   id: string;
   name: string;
-  address: string;
-  city: string;
-  country: string;
-  phone?: string;
-  website?: string;
+  address?: string;
+  contact_phone?: string;
+  contact_email?: string;
   created_at: string;
   qr_codes_count: number;
   reviews_count: number;
@@ -34,7 +32,7 @@ export default function OutletDetailPage() {
 
   useEffect(() => {
     const fetchOutletDetails = async () => {
-      if (!user?.user?.id || !id) return;
+      if (!user?.id || !id) return;
 
       setIsLoading(true);
       try {
@@ -42,12 +40,12 @@ export default function OutletDetailPage() {
         const { data, error } = await supabase
           .from(TABLES.OUTLETS)
           .select(`
-            id, name, address, city, country, phone, website, created_at,
+            id, name, address, contact_phone, contact_email, created_at,
             qr_codes:${TABLES.QR_CODES}(id),
             reviews:${TABLES.REVIEW_SESSIONS}(id)
           `)
           .eq('id', id)
-          .eq('merchant_id', user.user.id)
+          .eq('merchant_id', user.id)
           .single();
 
         if (error) throw error;
@@ -57,10 +55,8 @@ export default function OutletDetailPage() {
           id: data.id,
           name: data.name,
           address: data.address,
-          city: data.city,
-          country: data.country,
-          phone: data.phone,
-          website: data.website,
+          contact_phone: data.contact_phone,
+          contact_email: data.contact_email,
           created_at: data.created_at,
           qr_codes_count: data.qr_codes?.length || 0,
           reviews_count: data.reviews?.length || 0,
@@ -73,10 +69,10 @@ export default function OutletDetailPage() {
       }
     };
 
-    if (user?.user?.id && id) {
+    if (user?.id && id) {
       fetchOutletDetails();
     }
-  }, [user?.user?.id, id, t]);
+  }, [user?.id, id, t]);
 
   return (
     <DashboardLayout>
@@ -96,7 +92,7 @@ export default function OutletDetailPage() {
               <h1 className="text-2xl font-semibold">{outlet.name}</h1>
               <div className="flex items-center text-muted-foreground mt-1">
                 <MapPin className="h-4 w-4 mr-1" />
-                <span>{outlet.address}, {outlet.city}, {outlet.country}</span>
+                <span>{outlet.address}</span>
               </div>
             </div>
             <div className="mt-4 md:mt-0">
@@ -137,39 +133,25 @@ export default function OutletDetailPage() {
                           </dt>
                           <dd>{outlet.address}</dd>
                         </div>
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground">
-                            {t('outlets.fields.city')}
-                          </dt>
-                          <dd>{outlet.city}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-sm font-medium text-muted-foreground">
-                            {t('outlets.fields.country')}
-                          </dt>
-                          <dd>{outlet.country}</dd>
-                        </div>
-                        {outlet.phone && (
+                        {outlet.contact_phone && (
                           <div>
                             <dt className="text-sm font-medium text-muted-foreground">
                               {t('outlets.fields.phone')}
                             </dt>
-                            <dd>{outlet.phone}</dd>
+                            <dd>{outlet.contact_phone}</dd>
                           </div>
                         )}
-                        {outlet.website && (
+                        {outlet.contact_email && (
                           <div>
                             <dt className="text-sm font-medium text-muted-foreground">
-                              {t('outlets.fields.website')}
+                              {t('outlets.fields.email')}
                             </dt>
                             <dd>
                               <a 
-                                href={outlet.website} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
+                                href={`mailto:${outlet.contact_email}`} 
                                 className="text-primary hover:underline"
                               >
-                                {outlet.website}
+                                {outlet.contact_email}
                               </a>
                             </dd>
                           </div>

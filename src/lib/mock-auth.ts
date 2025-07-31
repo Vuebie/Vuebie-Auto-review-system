@@ -20,7 +20,7 @@ const MOCK_USERS: Record<string, { password: string; user: MockUser }> = {
   'superadmin@vuebie.com': {
     password: '123456',
     user: {
-      id: 'mock-super-admin-id',
+      id: '550e8400-e29b-41d4-a716-446655440000',
       email: 'superadmin@vuebie.com',
       user_metadata: {
         role: 'super_admin',
@@ -31,7 +31,7 @@ const MOCK_USERS: Record<string, { password: string; user: MockUser }> = {
   'admin@vuebie.com': {
     password: '123456',
     user: {
-      id: 'mock-admin-id',
+      id: '550e8400-e29b-41d4-a716-446655440001',
       email: 'admin@vuebie.com',
       user_metadata: {
         role: 'admin',
@@ -42,7 +42,7 @@ const MOCK_USERS: Record<string, { password: string; user: MockUser }> = {
   'merchant@vuebie.com': {
     password: '123456',
     user: {
-      id: 'mock-merchant-id',
+      id: '550e8400-e29b-41d4-a716-446655440002',
       email: 'merchant@vuebie.com',
       user_metadata: {
         role: 'merchant',

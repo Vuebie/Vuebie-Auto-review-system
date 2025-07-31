@@ -57,7 +57,7 @@ export default function QRCodesPage() {
 
   useEffect(() => {
     const fetchQrCodes = async () => {
-      if (!user?.user?.id) return;
+      if (!user?.id) return;
 
       setIsLoading(true);
       try {
@@ -70,7 +70,7 @@ export default function QRCodesPage() {
             scans:${TABLES.QR_SCANS}(id),
             reviews:${TABLES.REVIEW_SESSIONS}(id)
           `)
-          .eq('merchant_id', user.user.id)
+          .eq('merchant_id', user.id)
           .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -96,10 +96,10 @@ export default function QRCodesPage() {
       }
     };
 
-    if (user?.user?.id) {
+    if (user?.id) {
       fetchQrCodes();
     }
-  }, [user?.user?.id, t]);
+  }, [user?.id, t]);
 
   // Filter QR codes based on search query
   const filteredQrCodes = qrCodes.filter(

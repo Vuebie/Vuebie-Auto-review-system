@@ -26,7 +26,7 @@ import { signOut } from '@/lib/auth';
 
 export default function Header() {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
 
   const languages = getSupportedLanguages();
@@ -49,7 +49,7 @@ export default function Header() {
   const getInitials = () => {
     if (!user) return '?';
     
-    const name = user.user?.user_metadata?.full_name || user.user?.email || '';
+    const name = user.user_metadata?.full_name || user.email || '';
     return name
       .split(' ')
       .map((n) => n[0])
@@ -180,10 +180,10 @@ export default function Header() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <div className="px-2 py-1.5 text-sm font-medium">
-                  {user.user?.user_metadata?.full_name || user.user?.email}
+                  {user.user_metadata?.full_name || user.email}
                 </div>
                 <div className="px-2 py-1 text-xs text-muted-foreground">
-                  {user.role === 'merchant' && user.merchantProfile?.business_name}
+                  {user.role === 'merchant' && profile?.business_name}
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>

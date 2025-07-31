@@ -26,16 +26,28 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Building2, Plus, MoreHorizontal, Search, MapPin, QrCode } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Define outlet type
+// Define outlet type for display
 interface Outlet {
   id: string;
   name: string;
-  address: string;
-  city: string;
-  country: string;
+  address?: string;
+  contact_phone?: string;
+  contact_email?: string;
   qr_codes_count: number;
   reviews_count: number;
   created_at: string;
+}
+
+// Define raw outlet type from Supabase
+interface RawOutlet {
+  id: string;
+  name: string;
+  address?: string;
+  contact_phone?: string;
+  contact_email?: string;
+  created_at: string;
+  qr_codes: { id: string }[];
+  reviews: { id: string }[];
 }
 
 export default function OutletsPage() {
@@ -47,7 +59,7 @@ export default function OutletsPage() {
 
   useEffect(() => {
     const fetchOutlets = async () => {
-      if (!user?.user?.id) return;
+      if (!user?.id) return;
 
       setIsLoading(true);
       try {
@@ -55,26 +67,26 @@ export default function OutletsPage() {
         const { data, error } = await supabase
           .from(TABLES.OUTLETS)
           .select(`
-            id, name, address, city, country, created_at,
+            id, name, address, contact_phone, contact_email, created_at,
             qr_codes:${TABLES.QR_CODES}(id),
             reviews:${TABLES.REVIEW_SESSIONS}(id)
           `)
-          .eq('merchant_id', user.user.id)
+          .eq('merchant_id', user.id)
           .order('created_at', { ascending: false });
 
         if (error) throw error;
 
         // Transform the data to include counts
-        const transformedOutlets = data.map((outlet) => ({
+        const transformedOutlets: Outlet[] = (data as RawOutlet[])?.map((outlet) => ({
           id: outlet.id,
           name: outlet.name,
           address: outlet.address,
-          city: outlet.city,
-          country: outlet.country,
+          contact_phone: outlet.contact_phone,
+          contact_email: outlet.contact_email,
           created_at: outlet.created_at,
           qr_codes_count: outlet.qr_codes?.length || 0,
           reviews_count: outlet.reviews?.length || 0,
-        }));
+        })) || [];
 
         setOutlets(transformedOutlets);
       } catch (error) {
@@ -85,24 +97,24 @@ export default function OutletsPage() {
       }
     };
 
-    if (user?.user?.id) {
+    if (user?.id) {
       fetchOutlets();
     }
-  }, [user?.user?.id, t]);
+  }, [user?.id, t]);
 
   // Filter outlets based on search query
   const filteredOutlets = outlets.filter(
     (outlet) =>
       outlet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      outlet.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      outlet.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      outlet.country.toLowerCase().includes(searchQuery.toLowerCase())
+      (outlet.address && outlet.address.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (outlet.contact_phone && outlet.contact_phone.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (outlet.contact_email && outlet.contact_email.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
     <DashboardLayout
       title={t('outlets.title')}
-      description={t('outlets.description')}
+      description={t('outlets.pageDescription')}
     >
       {/* Actions Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -176,11 +188,22 @@ export default function OutletsPage() {
                 <CardTitle>{outlet.name}</CardTitle>
                 <CardDescription className="flex items-center">
                   <MapPin className="h-3.5 w-3.5 mr-1" />
-                  {outlet.city}, {outlet.country}
+                  {outlet.address || 'No address provided'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">{outlet.address}</p>
+                <div className="flex justify-between mt-2">
+                  {outlet.contact_phone && (
+                    <div className="text-sm text-muted-foreground">
+                      📞 {outlet.contact_phone}
+                    </div>
+                  )}
+                  {outlet.contact_email && (
+                    <div className="text-sm text-muted-foreground">
+                      ✉️ {outlet.contact_email}
+                    </div>
+                  )}
+                </div>
                 <div className="flex justify-between mt-4">
                   <div className="flex items-center">
                     <QrCode className="h-4 w-4 mr-1.5 text-muted-foreground" />

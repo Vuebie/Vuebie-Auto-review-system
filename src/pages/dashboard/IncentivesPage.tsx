@@ -45,7 +45,7 @@ export default function IncentivesPage() {
 
   useEffect(() => {
     const fetchIncentives = async () => {
-      if (!user?.user?.id) return;
+      if (!user?.id) return;
 
       setIsLoading(true);
       try {
@@ -56,7 +56,7 @@ export default function IncentivesPage() {
             id, name, description, active, created_at,
             qr_codes:${TABLES.QR_CODES}(id)
           `)
-          .eq('merchant_id', user.user.id)
+          .eq('merchant_id', user.id)
           .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -80,10 +80,10 @@ export default function IncentivesPage() {
       }
     };
 
-    if (user?.user?.id) {
+    if (user?.id) {
       fetchIncentives();
     }
-  }, [user?.user?.id, t]);
+  }, [user?.id, t]);
 
   // Filter incentives based on search query
   const filteredIncentives = incentives.filter(
